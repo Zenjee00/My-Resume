@@ -3,13 +3,17 @@ import '../PortfolioCSS/About.css';
 import {
   Children,
   cloneElement,
+  useCallback,
+  useEffect,
   useId,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react';
 
-import gmailImage from '../Photos/MyContacts/Gmail.png';
+import { Skeleton } from '@/components/ui/8bit/skeleton';
+import Extras, { getInitialTutorialStep } from './Extras';
+
 import linkedInImage from '../Photos/MyContacts/LinkedIn.png';
 import logoDeSalitran from '../Photos/MyExperience/Logo_de_salitran.jpg';
 import nuShield from '../Photos/MyExperience/NU_shield.png';
@@ -49,19 +53,18 @@ import typescriptLogo from '../Photos/Technicals/TS.png';
 import vercelLogo from '../Photos/Technicals/vercel.png';
 import vitestLogo from '../Photos/Technicals/vitest.png';
 import vscodeLogo from '../Photos/Technicals/VScode.png';
-
 const experiences = [
   {
     name: 'Colegio de Salitran',
     image: logoDeSalitran,
     description:
-      'UI/UX Design intern creating print branding, digital interfaces, and interactive front-end components.',
+      "As a UI/UX Designer Intern at Colegio De Salitran Inc. (Dec 2025 – Mar 2026), I produced print marketing materials using Adobe tools, redesigned the school's website UI/UX in TypeScript, and integrated an automated EmailJS contact form.",
   },
   {
     name: 'TeamQuest Technology Inc.',
     image: teamQuest,
     description:
-      'Technical Support intern helping clients with account access, cloud collaboration, and onboarding resources.',
+      "From April to June 2026, I worked as a Technical Support Intern at TeamQuest Technology Inc., handling end-user troubleshooting, Google Workspace administration, and multimedia production. I resolved client account access issues, streamlined cloud organization through Google Drive migrations and Google Forms, and edited CapCut training videos to improve employee onboarding and internal operations.",
   },
 ];
 
@@ -120,6 +123,18 @@ const projects = [
       'Capstone learning platform with guided modules, progress tracking, and certificates.',
     theme: 'light',
   },
+];
+
+const portfolioImages = [
+  ...experiences.map((experience) => experience.image),
+  ...technicalSkills.map(([, image]) => image),
+  ...projects.map((project) => project.image),
+  githubLogo,
+  linkedInImage,
+  myPhoto1,
+  myPhoto2,
+  nuShield,
+  certificateImage,
 ];
 
 const particleColors = ['#252D4B', '#756C8A', '#BBA8B0', '#161C35', '#080C1E'];
@@ -211,12 +226,19 @@ function DissolveCard({
   label,
   frontLabel,
   backLabel,
+  guideDescription,
+  guideButtonRef,
+  onReveal,
 }) {
   const [activeSide, setActiveSide] = useState(0);
   const [phase, setPhase] = useState('idle');
   const clipId = useId();
   const overlay = useRef(null);
   const visiblePixels = useRef(null);
+
+  useEffect(() => {
+    if (activeSide === 1 && phase === 'idle') onReveal?.();
+  }, [activeSide, phase, onReveal]);
 
   useLayoutEffect(() => {
     if (phase === 'idle') return;
@@ -318,15 +340,19 @@ function DissolveCard({
 
   return (
     <div
-      className={`DissolveCard ${className} is-${phase}`}
+      className={`DissolveCard ${className} is-${phase}${guideDescription ? ' TutorialTarget' : ''}`}
       onClick={toggleCard}
     >
       <button
+        ref={guideButtonRef}
         type="button"
         className="DissolveToggle"
         aria-pressed={activeSide === 1}
         aria-label={`${label}. Show ${activeSide === 1 ? frontLabel : backLabel}`}
+        aria-describedby={guideDescription}
       />
+
+      {guideDescription && <span className="TutorialArrow" aria-hidden="true" />}
 
       {Children.map(children, (child, index) =>
         cloneElement(child, {
@@ -365,9 +391,126 @@ function DissolveCard({
 
 function About() {
   const certificateDialogRef = useRef(null);
+  const profileButtonRef = useRef(null);
+  const summaryButtonRef = useRef(null);
+  const tutorialMessageId = useId();
+  const [tutorialStep, setTutorialStep] = useState(getInitialTutorialStep);
+  const [tutorialRun, setTutorialRun] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const closeTutorial = useCallback(() => {
+    setTutorialStep(null);
+  }, []);
+
+  function startTutorial() {
+    setTutorialRun((run) => run + 1);
+    setTutorialStep('profile');
+  }
+
+  useEffect(() => {
+    let remaining = portfolioImages.length;
+    let minimumTimeElapsed = false;
+
+    function finishLoading() {
+      remaining -= 1;
+      if (remaining === 0 && minimumTimeElapsed) setIsLoading(false);
+    }
+
+    const images = portfolioImages.map((source) => {
+      const image = new Image();
+      image.onload = finishLoading;
+      image.onerror = finishLoading;
+      image.src = source;
+      return image;
+    });
+
+    const minimumTimer = window.setTimeout(() => {
+      minimumTimeElapsed = true;
+      if (remaining === 0) setIsLoading(false);
+    }, 500);
+
+    return () => {
+      window.clearTimeout(minimumTimer);
+      images.forEach((image) => {
+        image.onload = null;
+        image.onerror = null;
+      });
+    };
+  }, []);
+
+  function preventImageAction(event) {
+    if (event.target instanceof HTMLImageElement) {
+      event.preventDefault();
+    }
+  }
 
   return (
-    <main className="AboutDiv">
+    <main
+      className="AboutDiv"
+      aria-busy={isLoading}
+      onCopy={(event) => event.preventDefault()}
+      onCut={(event) => event.preventDefault()}
+      onContextMenu={preventImageAction}
+      onDragStart={preventImageAction}
+    >
+      {!isLoading && (
+        <Extras
+          step={tutorialStep}
+          messageId={tutorialMessageId}
+          targetRef={
+            tutorialStep === 'profile'
+              ? profileButtonRef
+              : tutorialStep === 'summary' || tutorialStep === 'skills'
+                ? summaryButtonRef
+                : null
+          }
+          onStartTutorial={startTutorial}
+          onCloseTutorial={closeTutorial}
+        />
+      )}
+
+      {isLoading ? (
+        <div className="BentoLoadingGrid" role="status" aria-label="Loading portfolio">
+          <div className="BentoLoadingCard BentoLoadingCard--experience">
+            <Skeleton className="BentoLoadingTitle" />
+            <Skeleton className="BentoLoadingRow" />
+            <Skeleton className="BentoLoadingRow" />
+            <Skeleton className="BentoLoadingRow" />
+          </div>
+          <div className="BentoLoadingCard BentoLoadingCard--profile">
+            <Skeleton className="BentoLoadingImage" />
+          </div>
+          <div className="BentoLoadingCard BentoLoadingCard--education">
+            <Skeleton className="BentoLoadingTitle" />
+            <Skeleton className="BentoLoadingRow" />
+            <Skeleton className="BentoLoadingRow BentoLoadingRow--short" />
+          </div>
+          <div className="BentoLoadingCard BentoLoadingCard--intro">
+            <Skeleton className="BentoLoadingTitle" />
+            <Skeleton className="BentoLoadingRow" />
+            <Skeleton className="BentoLoadingRow" />
+            <Skeleton className="BentoLoadingRow BentoLoadingRow--short" />
+          </div>
+          <div className="BentoLoadingCard BentoLoadingCard--gallery">
+            <Skeleton className="BentoLoadingImage" />
+          </div>
+          <div className="BentoLoadingCard BentoLoadingCard--certificate">
+            <Skeleton className="BentoLoadingTitle" />
+            <Skeleton className="BentoLoadingImage BentoLoadingImage--certificate" />
+          </div>
+          <div className="BentoLoadingCard BentoLoadingCard--project">
+            <Skeleton className="BentoLoadingTitle" />
+            <Skeleton className="BentoLoadingImage BentoLoadingImage--project" />
+            <Skeleton className="BentoLoadingRow BentoLoadingRow--short" />
+          </div>
+          <div className="BentoLoadingCard BentoLoadingCard--project">
+            <Skeleton className="BentoLoadingTitle" />
+            <Skeleton className="BentoLoadingImage BentoLoadingImage--project" />
+            <Skeleton className="BentoLoadingRow BentoLoadingRow--short" />
+          </div>
+        </div>
+      ) : (
+      <>
       <div className="BentoGrid">
         <section className="BentoCard ExperienceBento">
           <h2>My Experience</h2>
@@ -378,7 +521,7 @@ function About() {
                 className="ExperienceBentoItem"
                 key={experience.name}
               >
-                <img
+                <img draggable={false}
                   src={experience.image}
                   alt={`${experience.name} logo`}
                 />
@@ -393,13 +536,17 @@ function About() {
         </section>
 
         <DissolveCard
+          key={`profile-${tutorialRun}`}
           className="ProfileBento"
           label="profile photo and contacts"
           frontLabel="profile photo"
           backLabel="contacts"
+          guideButtonRef={profileButtonRef}
+          guideDescription={tutorialStep === 'profile' ? tutorialMessageId : undefined}
+          onReveal={tutorialStep === 'profile' ? () => setTutorialStep('summary') : undefined}
         >
           <div className="DissolveLayer DissolveProfile">
-            <img
+            <img draggable={false}
               className="ProfileImage"
               src={myPhoto1}
               alt="Zenjee Viel Borjal"
@@ -409,6 +556,9 @@ function About() {
           <div className="DissolveLayer DissolveContacts">
             <div className="ContactBento">
               <h2>My Contacts</h2>
+              <p className="ContactBentoDescription">
+                Here are my contacts and profile feel free to reach out to me.
+              </p>
 
               <div className="ContactBentoLinks">
                 <a
@@ -417,16 +567,18 @@ function About() {
                   rel="noopener noreferrer"
                   onClick={(event) => event.stopPropagation()}
                 >
-                  <img src={linkedInImage} alt="" />
+                  <img draggable={false} src={linkedInImage} alt="" />
                   <span>LinkedIn</span>
                 </a>
 
                 <a
-                  href="mailto:"
+                  href="https://github.com/Zenjee00"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={(event) => event.stopPropagation()}
                 >
-                  <img src={gmailImage} alt="" />
-                  <span>Email</span>
+                  <img draggable={false} src={githubLogo} alt="" />
+                  <span>GitHub</span>
                 </a>
               </div>
             </div>
@@ -437,7 +589,7 @@ function About() {
           <h2>My Education</h2>
 
           <div className="EducationBentoContent">
-            <img
+            <img draggable={false}
               src={nuShield}
               alt="National University logo"
             />
@@ -453,18 +605,24 @@ function About() {
         </section>
 
         <DissolveCard
+          key={`summary-${tutorialRun}`}
           className="IntroBento"
           label="introduction and technical skills"
           frontLabel="introduction"
           backLabel="technical skills"
+          guideButtonRef={summaryButtonRef}
+          guideDescription={
+            tutorialStep === 'summary' || tutorialStep === 'skills'
+              ? tutorialMessageId
+              : undefined
+          }
+          onReveal={tutorialStep === 'summary' ? () => setTutorialStep('skills') : undefined}
         >
           <div className="DissolveLayer DissolveIntro">
             <p>
-              My name is Zenjee Viel S. Borjal, a fresh Information
-              Technology graduate specializing in Mobile and Web
-              Applications from National University - Dasmariñas.
-              I am passionate about technology, adaptable, and
-              committed to delivering quality work.
+              My name is Zenjee Viel Borjal, an Information Technology graduate from National University - Dasmariñas with a core focus on building intuitive web and mobile applications. 
+              I have a proven capability in delivering full-stack solutions, designing responsive UI/UX interfaces, and automating workflows. 
+              I am passionate about continuous learning, writing scalable code, and growing as a professional software engineer.
             </p>
           </div>
 
@@ -479,7 +637,7 @@ function About() {
         </DissolveCard>
 
         <div className="BentoCard GalleryBento">
-          <img
+          <img draggable={false}
             src={myPhoto2}
             alt="Zenjee at his graduation ceremony"
           />
@@ -496,7 +654,7 @@ function About() {
             }
             aria-label="View PMI Project Management Ready certificate"
           >
-            <img
+            <img draggable={false}
               src={certificateImage}
               alt="PMI Project Management Ready certificate"
             />
@@ -515,7 +673,7 @@ function About() {
           >
             <h2>{project.name}</h2>
 
-            <img
+            <img draggable={false}
               src={project.image}
               alt={`${project.name} logo`}
             />
@@ -528,6 +686,8 @@ function About() {
           </a>
         ))}
       </div>
+      </>
+      )}
 
       <dialog
         ref={certificateDialogRef}
@@ -550,7 +710,7 @@ function About() {
           ×
         </button>
 
-        <img
+        <img draggable={false}
           src={certificateImage}
           alt="PMI Project Management Ready certificate enlarged"
         />

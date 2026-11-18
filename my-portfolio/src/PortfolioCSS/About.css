@@ -2,13 +2,16 @@
   --bento-edge: #BBA8B0;
   --bento-ink: #171C3B;
   --bento-night: #0B1026;
+  --bento-rim: 4px;
   --bento-padding: 20px;
   box-sizing: border-box;
   width: 100%;
-  max-width: 1480px;
+  max-width: none;
   margin: 0 auto;
-  padding: 40px 28px 64px;
-  font-family: "Alagard", sans-serif;
+  padding: 40px 5vw 64px;
+  font-family: "Pixel Game", sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .AboutDiv *,
@@ -17,50 +20,429 @@
   box-sizing: border-box;
 }
 
+.AboutDiv img {
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+/* NPC walkthrough */
+.TutorialPanel,
+.ExtrasMenu {
+  position: fixed;
+  z-index: 20;
+}
+
+.TutorialPanel {
+  border: 3px solid var(--bento-edge);
+  background: var(--bento-ink);
+  box-shadow: inset 0 0 0 2px #5c526c, 4px 4px 0 var(--bento-night);
+  color: #f5edf2;
+}
+
+.TutorialPanel {
+  z-index: 32;
+  top: var(--tutorial-top, 50%);
+  left: var(--tutorial-left, 50%);
+  right: auto;
+  bottom: auto;
+  transform: var(--tutorial-transform, translate(-50%, -50%));
+  display: grid;
+  grid-template-columns: clamp(52px, 13vw, 86px) minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  width: min(420px, calc(100% - 32px));
+  max-height: 45dvh;
+  padding: 12px;
+  overflow: auto;
+}
+
+.TutorialBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  background: rgb(0 0 0 / 78%);
+  pointer-events: none;
+}
+
+.TutorialSpotlight {
+  position: fixed;
+  z-index: 31;
+  border: 3px solid #fff2fa;
+  background: transparent;
+  pointer-events: none;
+}
+
+.TutorialPortrait {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid var(--bento-edge);
+  background: #292d4d;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.TutorialHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 12px;
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.TutorialHeading span {
+  color: #dac9d2;
+  font: 600 12px / 1.4 system-ui, sans-serif;
+}
+
+.TutorialDialogue p {
+  margin: 6px 0 10px;
+  font: 14px / 1.45 system-ui, sans-serif;
+}
+
+.TutorialActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
+}
+
+.TutorialActions button {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 2px solid var(--bento-edge);
+  background: #303657;
+  color: #f5edf2;
+  font: 18px / 1 "Pixel Game", sans-serif;
+  cursor: pointer;
+}
+
+.TutorialActions .TutorialSkip {
+  background: var(--bento-ink);
+}
+
+.TutorialActions button:is(:hover, :focus-visible) {
+  background: #484967;
+}
+
+.TutorialActions button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.ExtrasMenu {
+  --extras-top: 25px;
+  --extras-left: 12px;
+  top: max(var(--extras-top), env(safe-area-inset-top));
+  left: max(var(--extras-left), env(safe-area-inset-left));
+  right: auto;
+  bottom: auto;
+  z-index: 18;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: start;
+  gap: 10px;
+}
+
+.ExtrasActions {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 8px;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-12px) scale(0.82);
+  transition:
+    opacity 180ms steps(4, end),
+    transform 220ms steps(5, end),
+    visibility 220ms;
+}
+
+.ExtrasMenu.is-open .ExtrasActions {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.ExtrasMenu.is-open .ExtrasActions > * {
+  animation: extras-item-pop 280ms steps(5, end) both;
+}
+
+.ExtrasMenu.is-open .ExtrasActions > :nth-child(2) {
+  animation-delay: 70ms;
+}
+
+@keyframes extras-item-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scaleX(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleX(1);
+  }
+}
+
+.ExtrasActions button,
+.ExtrasActions a {
+  min-width: 150px;
+  padding: 8px 10px;
+  border: 2px solid var(--bento-edge);
+  background: #303657;
+  box-shadow: 3px 3px 0 var(--bento-night);
+  color: #f5edf2;
+  font: 16px / 1.1 "Pixel Game", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ExtrasActions button:hover,
+.ExtrasActions button:focus-visible,
+.ExtrasActions a:hover,
+.ExtrasActions a:focus-visible {
+  background: #484967;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.ExtrasToggle {
+  width: 68px;
+  height: 68px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.ExtrasToggle:hover,
+.ExtrasToggle:focus-visible {
+  filter: brightness(1.18);
+  outline: none;
+}
+
+.ExtrasToggle img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ExtrasActions {
+    animation: none;
+    transition: none;
+  }
+}
+
+.DissolveCard.TutorialTarget {
+  z-index: 30;
+  --frame-face: #f3e2ed;
+}
+
+.TutorialArrow {
+  position: absolute;
+  z-index: 5;
+  top: 17px;
+  left: calc(50% - 16px);
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 2px 0 #171c3b) drop-shadow(0 0 4px #171c3b);
+  pointer-events: none;
+  animation: tutorial-arrow-hop 800ms steps(3, end) infinite alternate;
+}
+
+.TutorialArrow::after {
+  content: "";
+  display: block;
+  height: 100%;
+  background: #fff2fa;
+  clip-path: polygon(38% 0, 62% 0, 62% 51%, 100% 51%, 100% 63%, 87% 63%, 87% 75%, 75% 75%, 75% 87%, 62% 87%, 62% 100%, 38% 100%, 38% 87%, 25% 87%, 25% 75%, 13% 75%, 13% 63%, 0 63%, 0 51%, 38% 51%);
+}
+
+@keyframes tutorial-arrow-hop {
+  to { transform: translateY(8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .TutorialArrow { animation: none; }
+}
+
 .BentoGrid {
   display: grid;
-  width: min(100%, 1400px);
+  width: 100%;
   margin: 0 auto;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-template-rows: 270px 380px 250px;
   gap: 18px;
 }
 
-/* Midnight surfaces and stepped pixel frames */
+.BentoLoadingGrid {
+  display: grid;
+  width: 100%;
+  min-height: 918px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: 270px 380px 250px;
+  gap: 18px;
+}
+
+.BentoLoadingCard {
+  --loading-shadow: #080c1e;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--bento-padding);
+  overflow: hidden;
+  border: var(--bento-rim) solid var(--bento-edge);
+  background: #1a223d;
+  box-shadow: 4px 4px 0 var(--loading-shadow);
+  clip-path: var(--frame-shape);
+}
+
+.BentoLoadingCard--experience { grid-column: 1 / span 3; grid-row: 1 / span 2; }
+.BentoLoadingCard--profile { grid-column: 4 / span 3; grid-row: 1; }
+.BentoLoadingCard--education { grid-column: 7 / -1; grid-row: 1; }
+.BentoLoadingCard--intro { grid-column: 4 / span 6; grid-row: 2; }
+.BentoLoadingCard--gallery { grid-column: 10 / -1; grid-row: 2; }
+.BentoLoadingCard--certificate { grid-column: 1 / span 6; grid-row: 3; }
+.BentoLoadingCard--project { grid-column: 7 / span 3; grid-row: 3; }
+.BentoLoadingCard--project:last-child { grid-column: 10 / -1; }
+
+.BentoLoadingTitle,
+.BentoLoadingRow,
+.BentoLoadingImage {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: #303750;
+}
+
+.BentoLoadingTitle {
+  width: 52%;
+  height: 24px;
+  margin: 0 auto 8px;
+}
+
+.BentoLoadingRow {
+  width: 100%;
+  height: 16px;
+}
+
+.BentoLoadingRow--short {
+  width: 68%;
+}
+
+.BentoLoadingImage {
+  flex: 1;
+  min-height: 0;
+  background:
+    linear-gradient(135deg, transparent 47%, #5c526c 48% 52%, transparent 53%),
+    #27304d;
+}
+
+.BentoLoadingImage--certificate {
+  width: 70%;
+  align-self: center;
+}
+
+.BentoLoadingImage--project {
+  flex: 0 0 92px;
+  width: 70%;
+  align-self: center;
+}
+
+/* Shared stepped frame for cards and skill tiles. */
+.BentoCard,
+.DissolveCard,
+.BentoLoadingCard,
+.TechnicalBentoSkill {
+  --frame-pixel: 3px;
+  --frame-depth: calc(2 * var(--frame-pixel));
+  --frame-face: var(--bento-edge);
+  --frame-offset: calc(-1 * var(--bento-rim));
+  --frame-shape: polygon(
+    var(--frame-depth) 0, calc(100% - var(--frame-depth)) 0,
+    calc(100% - var(--frame-depth)) var(--frame-pixel),
+    calc(100% - var(--frame-pixel)) var(--frame-pixel),
+    calc(100% - var(--frame-pixel)) var(--frame-depth), 100% var(--frame-depth),
+    100% calc(100% - var(--frame-depth)),
+    calc(100% - var(--frame-pixel)) calc(100% - var(--frame-depth)),
+    calc(100% - var(--frame-pixel)) calc(100% - var(--frame-pixel)),
+    calc(100% - var(--frame-depth)) calc(100% - var(--frame-pixel)),
+    calc(100% - var(--frame-depth)) 100%, var(--frame-depth) 100%,
+    var(--frame-depth) calc(100% - var(--frame-pixel)),
+    var(--frame-pixel) calc(100% - var(--frame-pixel)),
+    var(--frame-pixel) calc(100% - var(--frame-depth)),
+    0 calc(100% - var(--frame-depth)), 0 var(--frame-depth),
+    var(--frame-pixel) var(--frame-depth),
+    var(--frame-pixel) var(--frame-pixel), var(--frame-depth) var(--frame-pixel)
+  );
+  position: relative;
+  clip-path: var(--frame-shape);
+}
 
 .BentoCard,
 .DissolveCard {
-  position: relative;
   isolation: isolate;
   min-width: 0;
   min-height: 0;
-  overflow: hidden;
-  border: 4px solid var(--bento-edge);
+  overflow: clip;
+  overflow-clip-margin: border-box;
+  border: var(--bento-rim) solid transparent;
   background:
     radial-gradient(ellipse at 10% 0%, rgb(187 168 176 / 14%), transparent 68%),
     linear-gradient(147deg, #1A223D, var(--bento-night) 72%);
-  box-shadow:
-    inset 0 0 0 2px #090D1E,
-    0 0 0 2px #13172D,
-    5px 5px 0 2px #080C1E;
   color: var(--bento-ink);
   -webkit-text-stroke: 1.6px var(--bento-edge);
   paint-order: stroke fill;
 }
 
-.BentoCard::before,
-.DissolveCard::before,
 .BentoCard::after,
-.DissolveCard::after {
+.DissolveCard::after,
+.TechnicalBentoSkill::after {
+  --rail-length: calc(100% - 2 * var(--frame-depth));
+  --chip-start: calc(3 * var(--frame-pixel));
+  --chip-end: calc(4 * var(--frame-pixel));
+  --chip-repeat: calc(10 * var(--frame-pixel));
+  --chip-stops:
+    transparent 0 var(--chip-start),
+    #93869C var(--chip-start) var(--chip-end),
+    transparent var(--chip-end) var(--chip-repeat);
+  --rail-x: repeating-linear-gradient(90deg, var(--chip-stops));
+  --rail-y: repeating-linear-gradient(0deg, var(--chip-stops));
   content: "";
   position: absolute;
+  inset: var(--frame-offset);
+  z-index: 2;
+  padding: var(--frame-depth);
   pointer-events: none;
+  clip-path: var(--frame-shape);
+  /* Use solid color bands so small accents do not break up the edge. */
+  background:
+    var(--rail-x) center top var(--frame-pixel) / var(--rail-length) var(--frame-pixel) no-repeat,
+    var(--rail-x) center bottom var(--frame-pixel) / var(--rail-length) var(--frame-pixel) no-repeat,
+    var(--rail-y) left var(--frame-pixel) center / var(--frame-pixel) var(--rail-length) no-repeat,
+    var(--rail-y) right var(--frame-pixel) center / var(--frame-pixel) var(--rail-length) no-repeat,
+    linear-gradient(#5C526C 0 0) center / calc(100% - 2 * var(--frame-pixel)) calc(100% - 2 * var(--frame-pixel)) no-repeat,
+    var(--frame-face);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
 }
 
 .BentoCard::before,
 .DissolveCard::before {
+  content: "";
+  position: absolute;
   inset: 0;
   z-index: 1;
+  pointer-events: none;
   background: linear-gradient(
     115deg,
     transparent 23%,
@@ -74,20 +456,6 @@
 
 .BentoCard::after,
 .DissolveCard::after {
-  --frame-glint: linear-gradient(#D8C9D2 0 0);
-  inset: 5px;
-  z-index: 2;
-  border: 1px solid rgb(187 168 176 / 44%);
-  background:
-    var(--frame-glint) left top / 11px 2px no-repeat,
-    var(--frame-glint) left top / 2px 11px no-repeat,
-    var(--frame-glint) right top / 11px 2px no-repeat,
-    var(--frame-glint) right top / 2px 11px no-repeat,
-    var(--frame-glint) left bottom / 11px 2px no-repeat,
-    var(--frame-glint) left bottom / 2px 11px no-repeat,
-    var(--frame-glint) right bottom / 11px 2px no-repeat,
-    var(--frame-glint) right bottom / 2px 11px no-repeat;
-  box-shadow: inset 0 0 10px rgb(187 168 176 / 16%);
   animation: bento-frame-shimmer 7s ease-in-out infinite alternate;
 }
 
@@ -107,10 +475,8 @@
 }
 
 @keyframes bento-frame-shimmer {
-  0% { opacity: 0.52; }
-  35% { opacity: 0.8; }
-  65% { opacity: 0.62; }
-  100% { opacity: 0.95; }
+  0%, 65% { filter: brightness(1); }
+  35%, 100% { filter: brightness(1.08); }
 }
 
 .BentoCard {
@@ -129,8 +495,8 @@
 .BentoCard h2,
 .ContactBento h2,
 .DissolveTechnical h2 {
-  margin: 0 0 14px;
-  font-size: 23px;
+  margin: 0 0 10px;
+  font-size: 26px;
   line-height: 1.2;
   text-align: center;
   -webkit-text-stroke-width: 2px;
@@ -216,15 +582,30 @@
 .ExperienceBentoItem h3,
 .EducationBentoContent h3 {
   margin: 0 0 8px;
-  font-size: 17px;
   line-height: 1.25;
 }
 
-.ExperienceBentoItem p,
 .EducationBentoContent p {
   margin: 0;
-  font-size: 15px;
+  line-height: 1.2;
+}
+
+.ExperienceBentoItem h3 {
+  font-size: 25px;
+}
+
+.ExperienceBentoItem p {
+  margin: 0;
+  font-size: 17.2px;
   line-height: 1.5;
+}
+
+.EducationBentoContent h3 {
+  font-size: 45px;
+}
+
+.EducationBentoContent p {
+  font-size: 25px;
 }
 
 /* Straight pixel dissolve */
@@ -244,7 +625,7 @@
 
 .DissolveCard:has(.DissolveToggle:focus-visible) {
   outline: 2px solid var(--bento-edge);
-  outline-offset: 4px;
+  outline-offset: -12px;
 }
 
 .DissolveParticles {
@@ -284,8 +665,9 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  background: #FFFFFF;
+  object-fit: contain;
+  object-position: center center;
 }
 
 /* Contacts */
@@ -297,25 +679,38 @@
 .ContactBento {
   display: grid;
   height: 100%;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto 1fr;
+}
+
+.ContactBentoDescription {
+  max-width: 34ch;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.10;
+  text-align: center;
 }
 
 .ContactBentoLinks {
   display: grid;
-  grid-template-columns: repeat(2, 27%);
+  grid-template-columns: repeat(2, 80px);
   align-self: center;
-  justify-content: space-between;
+  justify-content: center;
   justify-items: center;
-  padding-top: 24px;
+  column-gap: 120px;
+  padding-top: 5px;
 }
 
 .ContactBentoLinks a {
   display: grid;
   justify-items: center;
   gap: 8px;
-  color: inherit;
-  font-size: 15px;
+  font-size: 17px;
   text-decoration: none;
+}
+
+.ContactBentoLinks a > span {
+  color: var(--bento-ink);
+  -webkit-text-stroke: 1.6px var(--bento-edge);
 }
 
 .ContactBentoLinks a:hover,
@@ -325,8 +720,8 @@
 
 .ContactBentoLinks img {
   display: block;
-  width: 54px;
-  height: 54px;
+  width: 90px;
+  height: 90px;
   object-fit: contain;
 }
 
@@ -356,8 +751,8 @@
 
 .DissolveIntro p {
   margin: 0;
-  font-size: 20px;
-  line-height: 1.55;
+  font-size: 30px;
+  line-height: 1.35;
 }
 
 /* Technical Skills */
@@ -432,19 +827,20 @@
 }
 
 .TechnicalBentoSkill {
+  --frame-pixel: 2px;
+  --frame-offset: -1px;
   display: grid;
   width: var(--skill-tile-size);
   height: var(--skill-tile-size);
   place-items: center;
-  border: 1px solid rgb(187 168 176 / 45%);
+  border: 1px solid transparent;
   background: radial-gradient(ellipse at 50% 28%, #4B536D, #1B2542 86%);
-  box-shadow: inset 0 0 0 2px #131B32;
   cursor: default;
 }
 
 .TechnicalBentoSkill:hover,
 .TechnicalBentoSkill:focus-visible {
-  border-color: var(--bento-edge);
+  --frame-face: #DFD0D8;
   outline: none;
   background: radial-gradient(ellipse at 50% 28%, #5C6079, #26304E 86%);
 }
@@ -470,7 +866,7 @@
   border: 2px solid var(--bento-edge);
   background: #27304D;
   box-shadow: 2px 2px 0 #090D1F;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.2;
   text-align: center;
   pointer-events: none;
@@ -548,12 +944,12 @@
 
 .ProjectBento:focus-visible {
   outline: 2px solid var(--bento-edge);
-  outline-offset: 4px;
+  outline-offset: -12px;
 }
 
 .ProjectBento h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .ProjectBento img {
@@ -567,12 +963,12 @@
 
 .ProjectBento p {
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.4;
 }
 
 .ProjectBentoLink {
-  font-size: 14px;
+  font-size: 16px;
   text-decoration-color: var(--bento-edge);
   text-decoration: underline;
 }
@@ -625,19 +1021,23 @@
 /* Tablet */
 
 @media (max-width: 1100px) {
-  .BentoGrid {
+  .BentoGrid,
+  .BentoLoadingGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: none;
     grid-auto-rows: minmax(260px, auto);
   }
 
-  .BentoGrid > * {
+  .BentoGrid > *,
+  .BentoLoadingGrid > * {
     grid-column: auto;
     grid-row: auto;
   }
 
   .ExperienceBento,
-  .CertificationBento {
+  .CertificationBento,
+  .BentoLoadingCard--experience,
+  .BentoLoadingCard--certificate {
     grid-column: 1 / -1;
   }
 
@@ -645,7 +1045,8 @@
     min-height: 380px;
   }
 
-  .IntroBento {
+  .IntroBento,
+  .BentoLoadingCard--intro {
     min-height: 420px;
   }
 }
@@ -657,21 +1058,25 @@
     padding: 24px 14px 48px;
   }
 
-  .BentoGrid {
+  .BentoGrid,
+  .BentoLoadingGrid {
     display: flex;
     flex-direction: column;
   }
 
-  .BentoGrid > * {
+  .BentoGrid > *,
+  .BentoLoadingGrid > * {
     width: 100%;
     min-height: 250px;
   }
 
-  .ExperienceBento {
+  .ExperienceBento,
+  .BentoLoadingCard--experience {
     min-height: 420px;
   }
 
-  .IntroBento {
+  .IntroBento,
+  .BentoLoadingCard--intro {
     min-height: 330px;
   }
 
@@ -693,6 +1098,10 @@
   }
 
   .ProjectBento {
+    min-height: 260px;
+  }
+
+  .BentoLoadingCard--project {
     min-height: 260px;
   }
 }
