@@ -3,8 +3,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    linear-gradient(rgb(3 5 24 / 20%), rgb(3 5 24 / 20%)),
-    url("../assets/twinkling_farm_night.gif") center / cover fixed no-repeat;
+    linear-gradient(rgb(5 8 24 / 18%), rgb(5 8 24 / 32%)),
+    #080C1E url("../assets/twinkling_farm_night.gif") center / cover fixed no-repeat;
 }
 
 #root {

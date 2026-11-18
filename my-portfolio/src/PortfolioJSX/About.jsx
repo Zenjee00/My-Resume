@@ -3,7 +3,8 @@ import '../PortfolioCSS/About.css';
 import {
   Children,
   cloneElement,
-  useEffect,
+  useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -64,75 +65,43 @@ const experiences = [
   },
 ];
 
-const skillGroups = [
-  {
-    name: 'Programming Languages',
-    skills: [
-      ['JavaScript', javascriptLogo],
-      ['TypeScript', typescriptLogo],
-      ['HTML & CSS', htmlCssLogo],
-      ['Java', javaLogo],
-      ['Python', pythonLogo],
-      ['PHP', phpLogo],
-      ['Dart', dartLogo],
-    ],
-  },
-  {
-    name: 'Frameworks & Technologies',
-    skills: [
-      ['React', reactLogo],
-      ['Node.js', nodeJsLogo],
-      ['Express.js', expressJsLogo],
-      ['Laravel', laravelLogo],
-      ['Flutter', flutterLogo],
-      ['Android Studio', androidStudioLogo],
-    ],
-  },
-  {
-    name: 'Databases & Cloud',
-    skills: [
-      ['MySQL', mysqlLogo],
-      ['Firebase', firebaseLogo],
-      ['Supabase', supabaseLogo],
-      ['AWS', awsLogo],
-      ['Google Cloud', googleCloudLogo],
-    ],
-  },
-  {
-    name: 'Testing & Quality Assurance',
-    skills: [
-      ['Vitest', vitestLogo],
-      ['Playwright', playwrightLogo],
-    ],
-  },
-  {
-    name: 'UI/UX & Design',
-    skills: [
-      ['Figma', figmaLogo],
-      ['Photoshop', photoshopLogo],
-      ['Illustrator', illustratorLogo],
-    ],
-  },
-  {
-    name: 'Development Tools',
-    skills: [
-      ['Git', gitLogo],
-      ['GitHub', githubLogo],
-      ['GitLab', gitlabLogo],
-      ['VS Code', vscodeLogo],
-      ['Cursor', cursorLogo],
-      ['GitPilot', gitPilotLogo],
-      ['Vercel', vercelLogo],
-    ],
-  },
-  {
-    name: 'AI-Assisted Development',
-    skills: [
-      ['GitPilot', gitPilotLogo],
-      ['GitHub Copilot', githubLogo],
-    ],
-  },
+const technicalSkills = [
+  ['JavaScript', javascriptLogo],
+  ['TypeScript', typescriptLogo],
+  ['HTML & CSS', htmlCssLogo],
+  ['Java', javaLogo],
+  ['Python', pythonLogo],
+  ['PHP', phpLogo],
+  ['Dart', dartLogo],
+  ['React', reactLogo],
+  ['Node.js', nodeJsLogo],
+  ['Express.js', expressJsLogo],
+  ['Laravel', laravelLogo],
+  ['Flutter', flutterLogo],
+  ['Android Studio', androidStudioLogo],
+  ['MySQL', mysqlLogo],
+  ['Firebase', firebaseLogo],
+  ['Supabase', supabaseLogo],
+  ['AWS', awsLogo],
+  ['Google Cloud', googleCloudLogo],
+  ['Vitest', vitestLogo],
+  ['Playwright', playwrightLogo],
+  ['Figma', figmaLogo],
+  ['Photoshop', photoshopLogo],
+  ['Illustrator', illustratorLogo],
+  ['Git', gitLogo],
+  ['GitHub', githubLogo],
+  ['GitLab', gitlabLogo],
+  ['VS Code', vscodeLogo],
+  ['Cursor', cursorLogo],
+  ['GitPilot', gitPilotLogo],
+  ['Vercel', vercelLogo],
+  ['GitHub Copilot', githubLogo],
 ];
+
+const skillsPerRow = Math.ceil(technicalSkills.length / 2);
+const firstSkillRow = technicalSkills.slice(0, skillsPerRow);
+const secondSkillRow = technicalSkills.slice(skillsPerRow);
 
 const projects = [
   {
@@ -153,17 +122,88 @@ const projects = [
   },
 ];
 
-const dissolvePixels = Array.from({ length: 60 }, (_, index) => {
-  const row = Math.floor(index / 6);
-  const column = index % 6;
+const particleColors = ['#252D4B', '#756C8A', '#BBA8B0', '#161C35', '#080C1E'];
+const particleLifetime = 0.35;
 
-  return {
-    x: `${(column * 17 + row * 7) % 94}%`,
-    y: `${7 + row * 9}%`,
-    size: `${[5, 8, 12, 6][index % 4]}px`,
-    delay: `${row * 56 + (column % 3) * 10}ms`,
-  };
-});
+function TechnicalSkillRow({ skills, reverse = false }) {
+  const viewportRef = useRef(null);
+  const [tooltip, setTooltip] = useState(null);
+
+  function showSkill(skill, name) {
+    const { left } = viewportRef.current.getBoundingClientRect();
+    const bounds = skill.getBoundingClientRect();
+    setTooltip({ name, center: bounds.left + bounds.width / 2 - left });
+  }
+
+  function focusSkill(event, name) {
+    const skill = event.currentTarget;
+    if (!skill.matches(':focus-visible')) return;
+
+    const viewport = viewportRef.current;
+    viewport.scrollLeft = skill.offsetLeft - (viewport.clientWidth - skill.offsetWidth) / 2;
+    showSkill(skill, name);
+  }
+
+  return (
+    <div className={`TechnicalSkillRow${reverse ? ' TechnicalSkillRow--reverse' : ''}`}>
+      <div
+        className="TechnicalSkillViewport"
+        ref={viewportRef}
+        onBlur={(event) => {
+          const viewport = event.currentTarget;
+          if (viewport.contains(event.relatedTarget)) return;
+          setTooltip(null);
+          if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            viewport.scrollLeft = 0;
+          }
+        }}
+      >
+        <div className="TechnicalSkillTrack">
+          {[false, true].map((isCopy) => (
+            <ul
+              key={String(isCopy)}
+              className={`TechnicalSkillStrip${isCopy ? ' TechnicalSkillStrip--copy' : ''}`}
+              role="list"
+              aria-hidden={isCopy || undefined}
+            >
+              {skills.map(([name, image]) => (
+                <li
+                  key={name}
+                  className="TechnicalBentoSkill"
+                  tabIndex={isCopy ? undefined : 0}
+                  aria-label={isCopy ? undefined : name}
+                  onPointerEnter={(event) => {
+                    if (event.pointerType !== 'touch') showSkill(event.currentTarget, name);
+                  }}
+                  onPointerLeave={(event) => {
+                    if (!event.currentTarget.matches(':focus-visible')) setTooltip(null);
+                  }}
+                  onFocus={(event) => focusSkill(event, name)}
+                >
+                  <img src={image} alt="" draggable={false} />
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </div>
+
+      {tooltip && (
+        <span
+          className="TechnicalSkillLabel"
+          style={{ '--skill-center': `${tooltip.center}px` }}
+          aria-hidden="true"
+        >
+          {tooltip.name}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function pixelPath(x, y, width, height) {
+  return `M${x} ${y}h${width}v${height}h-${width}Z`;
+}
 
 function DissolveCard({
   children,
@@ -174,11 +214,96 @@ function DissolveCard({
 }) {
   const [activeSide, setActiveSide] = useState(0);
   const [phase, setPhase] = useState('idle');
-  const timers = useRef([]);
+  const clipId = useId();
+  const overlay = useRef(null);
+  const visiblePixels = useRef(null);
 
-  useEffect(() => () => {
-    timers.current.forEach(window.clearTimeout);
-  }, []);
+  useLayoutEffect(() => {
+    if (phase === 'idle') return;
+
+    const { width, height } = overlay.current.getBoundingClientRect();
+    const columns = Math.max(1, Math.ceil(width / 13));
+    const rows = Math.max(1, Math.ceil(height / 13));
+    const pixelWidth = 1 / columns;
+    const pixelHeight = 1 / rows;
+    const pixels = Array.from({ length: columns * rows }, (_, index) => {
+      const column = index % columns;
+      const row = Math.floor(index / columns);
+      const x = column * pixelWidth;
+      const y = row * pixelHeight;
+      const scatter = Math.sin((index + 1) * 127.1) * 43758.5453;
+      const noise = scatter - Math.floor(scatter);
+      const shade = noise < 0.3 ? 1 : 0;
+      // Start at the bottom and stagger nearby rows so the edge breaks into pixels.
+      const distanceFromBottom = 1 - (row + 0.5) / rows;
+      const order = distanceFromBottom * 0.72 + noise * 0.28;
+      return { x, y, order, shade, path: pixelPath(x, y, pixelWidth, pixelHeight) };
+    });
+    const mask = visiblePixels.current;
+    const particles = overlay.current.querySelectorAll('.DissolveParticle');
+    const leaving = phase === 'exiting';
+    const duration = leaving ? 360 : 740;
+    let startedAt;
+    let frame;
+
+    function paint(progress) {
+      let visible = '';
+      const particlePaths = particleColors.map(() => '');
+
+      for (const { x, y, order, shade, path } of pixels) {
+        if (leaving) {
+          // Fill the card with touching tiles, then hold the mosaic before the swap.
+          if (progress < 0.08 + order * 0.68) visible += path;
+          else particlePaths[shade] += path;
+          continue;
+        }
+
+        const age = (progress - order * (1 - particleLifetime)) / particleLifetime;
+        if (age >= 1) {
+          visible += path;
+        } else if (age <= 0) {
+          particlePaths[shade] += path;
+        } else {
+          const lastShade = particleColors.length - 1;
+          const agedShade = Math.min(lastShade, shade + Math.floor(age * (lastShade - shade + 1)));
+          const size = 1 - Math.max(0, (age - 0.25) / 0.75);
+          const inset = (1 - size) / 2;
+          // Move in quarter-tile steps to keep the motion pixelated.
+          const rise = Math.floor(age * 8) / 4;
+          particlePaths[agedShade] += pixelPath(
+            x + inset * pixelWidth,
+            y + (inset - rise) * pixelHeight,
+            size * pixelWidth,
+            size * pixelHeight,
+          );
+        }
+      }
+
+      mask.setAttribute('d', visible);
+      particles.forEach((particle, index) => {
+        particle.setAttribute('d', particlePaths[index]);
+      });
+    }
+
+    function tick(time) {
+      startedAt ??= time;
+      const progress = Math.min((time - startedAt) / duration, 1);
+      paint(progress);
+
+      if (progress < 1) {
+        frame = requestAnimationFrame(tick);
+      } else if (leaving) {
+        setActiveSide((current) => 1 - current);
+        setPhase('entering');
+      } else {
+        setPhase('idle');
+      }
+    }
+
+    paint(0);
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [phase]);
 
   function toggleCard() {
     if (phase !== 'idle') return;
@@ -189,70 +314,50 @@ function DissolveCard({
     }
 
     setPhase('exiting');
-
-    timers.current = [
-      window.setTimeout(() => {
-        setActiveSide((current) => 1 - current);
-        setPhase('entering');
-
-        timers.current = [
-          window.setTimeout(() => {
-            setPhase('idle');
-            timers.current = [];
-          }, 650),
-        ];
-      }, 800),
-    ];
   }
 
   return (
     <div
       className={`DissolveCard ${className} is-${phase}`}
-      role="button"
-      tabIndex={0}
-      aria-pressed={activeSide === 1}
-      aria-label={`${label}. Click to show ${
-        activeSide === 1 ? frontLabel : backLabel
-      }`}
       onClick={toggleCard}
-      onKeyDown={(event) => {
-        if (
-          event.target === event.currentTarget &&
-          (event.key === 'Enter' || event.key === ' ')
-        ) {
-          event.preventDefault();
-          toggleCard();
-        }
-      }}
     >
+      <button
+        type="button"
+        className="DissolveToggle"
+        aria-pressed={activeSide === 1}
+        aria-label={`${label}. Show ${activeSide === 1 ? frontLabel : backLabel}`}
+      />
+
       {Children.map(children, (child, index) =>
         cloneElement(child, {
           className: `${child.props.className} ${
             index === activeSide ? 'is-active' : ''
           }`,
+          style: index === activeSide && phase !== 'idle'
+            ? { clipPath: `url("#${clipId}")` }
+            : undefined,
           'aria-hidden': index !== activeSide,
           inert: index !== activeSide,
         }),
       )}
 
-      {phase === 'exiting' && (
-        <div
+      {phase !== 'idle' && (
+        <svg
           className="DissolveParticles"
           aria-hidden="true"
+          viewBox="0 0 1 1"
+          preserveAspectRatio="none"
+          ref={overlay}
         >
-          {dissolvePixels.map((pixel, index) => (
-            <span
-              className="DissolveParticle"
-              key={index}
-              style={{
-                '--x': pixel.x,
-                '--y': pixel.y,
-                '--size': pixel.size,
-                '--delay': pixel.delay,
-              }}
-            />
+          <defs>
+            <clipPath id={clipId} clipPathUnits="objectBoundingBox">
+              <path ref={visiblePixels} />
+            </clipPath>
+          </defs>
+          {particleColors.map((color) => (
+            <path className="DissolveParticle" key={color} fill={color} />
           ))}
-        </div>
+        </svg>
       )}
     </div>
   );
@@ -367,29 +472,8 @@ function About() {
             <h2>Technical Skills</h2>
 
             <div className="TechnicalBentoContent">
-              {skillGroups.map((group, index) => (
-                <section
-                  className={`TechnicalGroup TechnicalGroup--${
-                    index + 1
-                  }`}
-                  key={group.name}
-                >
-                  <h3>{group.name}</h3>
-
-                  <div className="TechnicalGroupIcons">
-                    {group.skills.map(([name, image]) => (
-                      <div
-                        className="TechnicalBentoSkill"
-                        key={name}
-                        title={name}
-                      >
-                        <img src={image} alt="" />
-                        <span>{name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              ))}
+              <TechnicalSkillRow skills={firstSkillRow} />
+              <TechnicalSkillRow skills={secondSkillRow} reverse />
             </div>
           </div>
         </DissolveCard>
