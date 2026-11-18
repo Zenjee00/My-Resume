@@ -1,0 +1,7 @@
+{
+    "editor.suggest.snippetsPreventQuickSuggestions": true,
+    "editor.suggest.showStatusBar": true,
+    "editor.suggest.preview": true,
+    "editor.inlineSuggest.suppressSuggestions": true,
+    "editor.inlineSuggest.edits.showCollapsed": true
+}
