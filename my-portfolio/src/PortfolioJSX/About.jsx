@@ -12,7 +12,8 @@ import {
 } from 'react';
 
 import { Skeleton } from '@/components/ui/8bit/skeleton';
-import Extras, { getInitialTutorialStep } from './Extras';
+import { AnimatedShinyText } from '@/components/ui/animated-shiny-text';
+import { ShineBorder } from '@/components/ui/shine-border';
 
 import linkedInImage from '../Photos/MyContacts/LinkedIn.png';
 import logoDeSalitran from '../Photos/MyExperience/Logo_de_salitran.jpg';
@@ -53,6 +54,8 @@ import typescriptLogo from '../Photos/Technicals/TS.png';
 import vercelLogo from '../Photos/Technicals/vercel.png';
 import vitestLogo from '../Photos/Technicals/vitest.png';
 import vscodeLogo from '../Photos/Technicals/VScode.png';
+import Extras, { getInitialTutorialStep } from './Extras';
+
 const experiences = [
   {
     name: 'Colegio de Salitran',
@@ -209,7 +212,7 @@ function TechnicalSkillRow({ skills, reverse = false }) {
           style={{ '--skill-center': `${tooltip.center}px` }}
           aria-hidden="true"
         >
-          {tooltip.name}
+          <AnimatedShinyText>{tooltip.name}</AnimatedShinyText>
         </span>
       )}
     </div>
@@ -343,6 +346,7 @@ function DissolveCard({
       className={`DissolveCard ${className} is-${phase}${guideDescription ? ' TutorialTarget' : ''}`}
       onClick={toggleCard}
     >
+      <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
       <button
         ref={guideButtonRef}
         type="button"
@@ -513,7 +517,12 @@ function About() {
       <>
       <div className="BentoGrid">
         <section className="BentoCard ExperienceBento">
-          <h2>My Experience</h2>
+          <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
+          <h2>
+            <AnimatedShinyText shimmerWidth={120}>
+              My Experience
+            </AnimatedShinyText>
+          </h2>
 
           <div className="ExperienceBentoList">
             {experiences.map((experience) => (
@@ -527,8 +536,12 @@ function About() {
                 />
 
                 <div>
-                  <h3>{experience.name}</h3>
-                  <p>{experience.description}</p>
+                  <h3>
+                    <AnimatedShinyText>{experience.name}</AnimatedShinyText>
+                  </h3>
+                  <p>
+                    <AnimatedShinyText>{experience.description}</AnimatedShinyText>
+                  </p>
                 </div>
               </article>
             ))}
@@ -555,9 +568,15 @@ function About() {
 
           <div className="DissolveLayer DissolveContacts">
             <div className="ContactBento">
-              <h2>My Contacts</h2>
+              <h2>
+                <AnimatedShinyText shimmerWidth={120}>
+                  My Contacts
+                </AnimatedShinyText>
+              </h2>
               <p className="ContactBentoDescription">
-                Here are my contacts and profile feel free to reach out to me.
+                <AnimatedShinyText>
+                  Here are my contacts and profile feel free to reach out to me.
+                </AnimatedShinyText>
               </p>
 
               <div className="ContactBentoLinks">
@@ -568,7 +587,7 @@ function About() {
                   onClick={(event) => event.stopPropagation()}
                 >
                   <img draggable={false} src={linkedInImage} alt="" />
-                  <span>LinkedIn</span>
+                  <AnimatedShinyText>LinkedIn</AnimatedShinyText>
                 </a>
 
                 <a
@@ -578,7 +597,7 @@ function About() {
                   onClick={(event) => event.stopPropagation()}
                 >
                   <img draggable={false} src={githubLogo} alt="" />
-                  <span>GitHub</span>
+                  <AnimatedShinyText>GitHub</AnimatedShinyText>
                 </a>
               </div>
             </div>
@@ -586,7 +605,12 @@ function About() {
         </DissolveCard>
 
         <section className="BentoCard EducationBento">
-          <h2>My Education</h2>
+          <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
+          <h2>
+            <AnimatedShinyText shimmerWidth={120}>
+              My Education
+            </AnimatedShinyText>
+          </h2>
 
           <div className="EducationBentoContent">
             <img draggable={false}
@@ -595,10 +619,14 @@ function About() {
             />
 
             <div>
-              <h3>National University - Dasmariñas</h3>
+              <h3>
+                <AnimatedShinyText>National University - Dasmariñas</AnimatedShinyText>
+              </h3>
               <p>
-                Bachelor of Science in Information Technology,
-                specializing in Mobile and Web Applications.
+                <AnimatedShinyText>
+                  Bachelor of Science in Information Technology,
+                  specializing in Mobile and Web Applications.
+                </AnimatedShinyText>
               </p>
             </div>
           </div>
@@ -620,14 +648,20 @@ function About() {
         >
           <div className="DissolveLayer DissolveIntro">
             <p>
-              My name is Zenjee Viel Borjal, an Information Technology graduate from National University - Dasmariñas with a core focus on building intuitive web and mobile applications. 
-              I have a proven capability in delivering full-stack solutions, designing responsive UI/UX interfaces, and automating workflows. 
-              I am passionate about continuous learning, writing scalable code, and growing as a professional software engineer.
+              <AnimatedShinyText shimmerWidth={180}>
+                My name is Zenjee Viel Borjal, an Information Technology graduate from National University - Dasmariñas with a core focus on building intuitive web and mobile applications.
+                I have a proven capability in delivering full-stack solutions, designing responsive UI/UX interfaces, and automating workflows.
+                I am passionate about continuous learning, writing scalable code, and growing as a professional software engineer.
+              </AnimatedShinyText>
             </p>
           </div>
 
           <div className="DissolveLayer DissolveTechnical">
-            <h2>Technical Skills</h2>
+            <h2>
+              <AnimatedShinyText shimmerWidth={140}>
+                Technical Skills
+              </AnimatedShinyText>
+            </h2>
 
             <div className="TechnicalBentoContent">
               <TechnicalSkillRow skills={firstSkillRow} />
@@ -637,6 +671,7 @@ function About() {
         </DissolveCard>
 
         <div className="BentoCard GalleryBento">
+          <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
           <img draggable={false}
             src={myPhoto2}
             alt="Zenjee at his graduation ceremony"
@@ -644,7 +679,12 @@ function About() {
         </div>
 
         <section className="BentoCard CertificationBento">
-          <h2>My Certification/s</h2>
+          <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
+          <h2>
+            <AnimatedShinyText shimmerWidth={120}>
+              My Certification/s
+            </AnimatedShinyText>
+          </h2>
 
           <button
             type="button"
@@ -671,17 +711,24 @@ function About() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <h2>{project.name}</h2>
+            <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
+              <h2>
+                <AnimatedShinyText shimmerWidth={100}>
+                  {project.name}
+                </AnimatedShinyText>
+              </h2>
 
             <img draggable={false}
               src={project.image}
               alt={`${project.name} logo`}
             />
 
-            <p>{project.description}</p>
+            <p>
+              <AnimatedShinyText>{project.description}</AnimatedShinyText>
+            </p>
 
             <span className="ProjectBentoLink">
-              Open project ↗
+              <AnimatedShinyText>Open project ↗</AnimatedShinyText>
             </span>
           </a>
         ))}
@@ -707,7 +754,7 @@ function About() {
           }
           aria-label="Close certificate"
         >
-          ×
+          <AnimatedShinyText>×</AnimatedShinyText>
         </button>
 
         <img draggable={false}

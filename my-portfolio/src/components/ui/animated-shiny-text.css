@@ -1,0 +1,60 @@
+.AnimatedShinyText {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: baseline;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  -webkit-text-fill-color: currentColor;
+  -webkit-text-stroke: inherit;
+  paint-order: inherit;
+  isolation: isolate;
+}
+
+.AnimatedShinyText > .AnimatedShinyTextGleam {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  white-space: inherit;
+  -webkit-text-stroke: 0;
+  -webkit-text-fill-color: transparent;
+  pointer-events: none;
+  user-select: none;
+  opacity: var(--shiny-opacity, 0.60);
+  background-image: linear-gradient(
+    110deg,
+    transparent 20%,
+    rgb(198 191 181 / 35%) 42%,
+    #C6BFB5 50%,
+    rgb(198 191 181 / 35%) 58%,
+    transparent 80%
+  );
+  background-size: var(--shiny-width, 100px) 100%;
+  background-position: calc(-1 * var(--shiny-width, 100px)) 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: portfolio-text-shine var(--shiny-duration, 6s) ease-in-out infinite;
+}
+
+@keyframes portfolio-text-shine {
+  0%, 15% {
+    background-position: calc(-1 * var(--shiny-width, 100px)) 0;
+  }
+
+  85%, 100% {
+    background-position: calc(100% + var(--shiny-width, 100px)) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  .AnimatedShinyText > .AnimatedShinyTextGleam {
+    display: none;
+    animation: none;
+  }
+}

@@ -1,10 +1,11 @@
-
 import {
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react';
+
+import { AnimatedShinyText } from '@/components/ui/animated-shiny-text';
 
 import extrasIcon from '../Photos/Icons/Extras.png';
 import npcPortrait from '../Photos/MyPhotos/NPC.png';
@@ -112,6 +113,34 @@ function Extras({
     return () => window.removeEventListener('keydown', handleEscape);
   }, [step, onCloseTutorial]);
 
+  useEffect(() => {
+    if (!step) return;
+
+    function isTutorialControl(target) {
+      return (
+        panelRef.current?.contains(target) ||
+        targetRef?.current?.parentElement?.contains(target)
+      );
+    }
+
+    function blockOutsideInteraction(event) {
+      if (event.key === 'Escape' || isTutorialControl(event.target)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    document.addEventListener('click', blockOutsideInteraction, true);
+    document.addEventListener('pointerdown', blockOutsideInteraction, true);
+    document.addEventListener('keydown', blockOutsideInteraction, true);
+
+    return () => {
+      document.removeEventListener('click', blockOutsideInteraction, true);
+      document.removeEventListener('pointerdown', blockOutsideInteraction, true);
+      document.removeEventListener('keydown', blockOutsideInteraction, true);
+    };
+  }, [step, targetRef]);
+
   function closeTutorial() {
     rememberTutorial();
     onCloseTutorial();
@@ -147,15 +176,25 @@ function Extras({
           <img className="TutorialPortrait" src={npcPortrait} alt="" draggable={false} />
           <div className="TutorialDialogue">
             <div className="TutorialHeading">
-              <strong>Portfolio guide</strong>
-              <span>Step {stages[step].number} of 2</span>
+              <strong>
+                <AnimatedShinyText>Portfolio guide</AnimatedShinyText>
+              </strong>
+              <span>
+                <AnimatedShinyText>Step {stages[step].number} of 2</AnimatedShinyText>
+              </span>
             </div>
-            <p id={messageId} role="status">{stages[step].message}</p>
+            <p id={messageId} role="status">
+              <AnimatedShinyText>{stages[step].message}</AnimatedShinyText>
+            </p>
             <div className="TutorialActions">
               {step === 'skills' ? (
-                <button type="button" ref={actionRef} onClick={closeTutorial}>Finish</button>
+                <button type="button" ref={actionRef} onClick={closeTutorial}>
+                  <AnimatedShinyText>Finish</AnimatedShinyText>
+                </button>
               ) : (
-                <button type="button" className="TutorialSkip" onClick={closeTutorial}>Skip</button>
+                <button type="button" className="TutorialSkip" onClick={closeTutorial}>
+                  <AnimatedShinyText>Skip</AnimatedShinyText>
+                </button>
               )}
             </div>
           </div>
@@ -172,7 +211,7 @@ function Extras({
               onStartTutorial();
             }}
           >
-            Portfolio Guide
+            <AnimatedShinyText>Portfolio Guide</AnimatedShinyText>
           </button>
 
           <a
@@ -181,7 +220,7 @@ function Extras({
             rel="noopener noreferrer"
             tabIndex={isOpen ? 0 : -1}
           >
-            View Resume
+            <AnimatedShinyText>View Resume</AnimatedShinyText>
           </a>
         </div>
 
