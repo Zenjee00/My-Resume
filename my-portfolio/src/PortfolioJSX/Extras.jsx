@@ -280,7 +280,7 @@ function Extras({
           type="button"
           className="ExtrasToggle"
           aria-label={isOpen ? 'Close extra actions' : 'Open extra actions'}
-          aria-expanded={isOpen}
+          aria-expanded={isOpen}  
           onClick={() => setIsOpen((open) => !open)}
         >
           <img src={extrasIcon} alt="" draggable={false} />

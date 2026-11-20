@@ -219,6 +219,54 @@ function TechnicalSkillRow({ skills, reverse = false }) {
   );
 }
 
+// The real card stays mounted beneath this overlay, so its content controls sizing.
+function BentoCardSkeleton({ variant }) {
+  const lines = (count) => (
+    <div className="BentoLoadingLines">
+      {Array.from({ length: count }, (_, index) => (
+        <Skeleton
+          key={index}
+          className={`BentoLoadingRow${index === count - 1 ? ' BentoLoadingRow--short' : ''}`}
+        />
+      ))}
+    </div>
+  );
+
+  return (
+    <div className={`BentoCardSkeleton BentoCardSkeleton--${variant}`} aria-hidden="true">
+      {variant === 'profile' || variant === 'gallery' ? (
+        <Skeleton className="BentoLoadingImage" />
+      ) : variant === 'experience' ? (
+        <>
+          <Skeleton className="BentoLoadingTitle" />
+          {[0, 1].map((item) => (
+            <div className="BentoLoadingExperience" key={item}>
+              <Skeleton className="BentoLoadingLogo" />
+              {lines(5)}
+            </div>
+          ))}
+        </>
+      ) : variant === 'education' ? (
+        <>
+          <Skeleton className="BentoLoadingTitle" />
+          <div className="BentoLoadingEducation">
+            <Skeleton className="BentoLoadingLogo" />
+            {lines(4)}
+          </div>
+        </>
+      ) : variant === 'intro' ? (
+        lines(7)
+      ) : (
+        <>
+          <Skeleton className="BentoLoadingTitle" />
+          <Skeleton className={`BentoLoadingImage BentoLoadingImage--${variant}`} />
+          {variant === 'project' && lines(3)}
+        </>
+      )}
+    </div>
+  );
+}
+
 function pixelPath(x, y, width, height) {
   return `M${x} ${y}h${width}v${height}h-${width}Z`;
 }
@@ -232,6 +280,7 @@ function DissolveCard({
   guideDescription,
   guideButtonRef,
   onReveal,
+  isLoading = false,
 }) {
   const [activeSide, setActiveSide] = useState(0);
   const [phase, setPhase] = useState('idle');
@@ -371,6 +420,10 @@ function DissolveCard({
         }),
       )}
 
+      {isLoading && (
+        <BentoCardSkeleton variant={className === 'ProfileBento' ? 'profile' : 'intro'} />
+      )}
+
       {phase !== 'idle' && (
         <svg
           className="DissolveParticles"
@@ -473,50 +526,17 @@ function About() {
         />
       )}
 
-      {isLoading ? (
-        <div className="BentoLoadingGrid" role="status" aria-label="Loading portfolio">
-          <div className="BentoLoadingCard BentoLoadingCard--experience">
-            <Skeleton className="BentoLoadingTitle" />
-            <Skeleton className="BentoLoadingRow" />
-            <Skeleton className="BentoLoadingRow" />
-            <Skeleton className="BentoLoadingRow" />
-          </div>
-          <div className="BentoLoadingCard BentoLoadingCard--profile">
-            <Skeleton className="BentoLoadingImage" />
-          </div>
-          <div className="BentoLoadingCard BentoLoadingCard--education">
-            <Skeleton className="BentoLoadingTitle" />
-            <Skeleton className="BentoLoadingRow" />
-            <Skeleton className="BentoLoadingRow BentoLoadingRow--short" />
-          </div>
-          <div className="BentoLoadingCard BentoLoadingCard--intro">
-            <Skeleton className="BentoLoadingTitle" />
-            <Skeleton className="BentoLoadingRow" />
-            <Skeleton className="BentoLoadingRow" />
-            <Skeleton className="BentoLoadingRow BentoLoadingRow--short" />
-          </div>
-          <div className="BentoLoadingCard BentoLoadingCard--gallery">
-            <Skeleton className="BentoLoadingImage" />
-          </div>
-          <div className="BentoLoadingCard BentoLoadingCard--certificate">
-            <Skeleton className="BentoLoadingTitle" />
-            <Skeleton className="BentoLoadingImage BentoLoadingImage--certificate" />
-          </div>
-          <div className="BentoLoadingCard BentoLoadingCard--project">
-            <Skeleton className="BentoLoadingTitle" />
-            <Skeleton className="BentoLoadingImage BentoLoadingImage--project" />
-            <Skeleton className="BentoLoadingRow BentoLoadingRow--short" />
-          </div>
-          <div className="BentoLoadingCard BentoLoadingCard--project">
-            <Skeleton className="BentoLoadingTitle" />
-            <Skeleton className="BentoLoadingImage BentoLoadingImage--project" />
-            <Skeleton className="BentoLoadingRow BentoLoadingRow--short" />
-          </div>
-        </div>
-      ) : (
-      <>
-      <div className="BentoGrid">
+      {isLoading && (
+        <span className="BentoLoadingStatus" role="status">Loading portfolio</span>
+      )}
+
+      <div
+        className={`BentoGrid${isLoading ? ' is-loading' : ''}`}
+        aria-hidden={isLoading || undefined}
+        inert={isLoading}
+      >
         <section className="BentoCard ExperienceBento">
+          {isLoading && <BentoCardSkeleton variant="experience" />}
           <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
           <h2>
             <AnimatedShinyText shimmerWidth={120}>
@@ -551,6 +571,7 @@ function About() {
         <DissolveCard
           key={`profile-${tutorialRun}`}
           className="ProfileBento"
+          isLoading={isLoading}
           label="profile photo and contacts"
           frontLabel="profile photo"
           backLabel="contacts"
@@ -605,6 +626,7 @@ function About() {
         </DissolveCard>
 
         <section className="BentoCard EducationBento">
+          {isLoading && <BentoCardSkeleton variant="education" />}
           <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
           <h2>
             <AnimatedShinyText shimmerWidth={120}>
@@ -635,6 +657,7 @@ function About() {
         <DissolveCard
           key={`summary-${tutorialRun}`}
           className="IntroBento"
+          isLoading={isLoading}
           label="introduction and technical skills"
           frontLabel="introduction"
           backLabel="technical skills"
@@ -671,6 +694,7 @@ function About() {
         </DissolveCard>
 
         <div className="BentoCard GalleryBento">
+          {isLoading && <BentoCardSkeleton variant="gallery" />}
           <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
           <img draggable={false}
             src={myPhoto2}
@@ -679,6 +703,7 @@ function About() {
         </div>
 
         <section className="BentoCard CertificationBento">
+          {isLoading && <BentoCardSkeleton variant="certificate" />}
           <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
           <h2>
             <AnimatedShinyText shimmerWidth={120}>
@@ -711,6 +736,7 @@ function About() {
             target="_blank"
             rel="noopener noreferrer"
           >
+            {isLoading && <BentoCardSkeleton variant="project" />}
             <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
               <h2>
                 <AnimatedShinyText shimmerWidth={100}>
@@ -733,8 +759,6 @@ function About() {
           </a>
         ))}
       </div>
-      </>
-      )}
 
       <dialog
         ref={certificateDialogRef}

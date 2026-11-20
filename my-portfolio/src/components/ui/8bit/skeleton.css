@@ -1,0 +1,37 @@
+.PixelSkeleton {
+  --skeleton-notch: 4px;
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--skeleton-fill, #303750);
+  clip-path: polygon(
+    var(--skeleton-notch) 0,
+    calc(100% - var(--skeleton-notch)) 0,
+    calc(100% - var(--skeleton-notch)) var(--skeleton-notch),
+    100% var(--skeleton-notch),
+    100% calc(100% - var(--skeleton-notch)),
+    calc(100% - var(--skeleton-notch)) calc(100% - var(--skeleton-notch)),
+    calc(100% - var(--skeleton-notch)) 100%,
+    var(--skeleton-notch) 100%,
+    var(--skeleton-notch) calc(100% - var(--skeleton-notch)),
+    0 calc(100% - var(--skeleton-notch)),
+    0 var(--skeleton-notch),
+    var(--skeleton-notch) var(--skeleton-notch)
+  );
+  animation: pixel-skeleton-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pixel-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .PixelSkeleton { animation: none; }
+}
