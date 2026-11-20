@@ -115,6 +115,7 @@ export function ShineBorder({
       className={`ShineBorder${simpleEffects ? ' ShineBorder--simple' : ''} ${className}`}
       style={{
         '--simple-shine': colors[0] || '#C6BFB5',
+        '--simple-shine-duration': `${Math.max(10, seconds)}s`,
         position: 'absolute',
         inset: 'var(--shine-border-inset, 0px)',
         padding: `var(--shine-border-width, ${borderWidth}px)`,
@@ -129,7 +130,14 @@ export function ShineBorder({
       }}
     >
       {simpleEffects ? (
-        <span className="ShineBorderSimpleGleam" />
+        <span className="ShineBorderSimpleGleam">
+          {['top', 'right', 'bottom', 'left'].map((edge) => (
+            <span key={edge} className={`ShineBorderSimpleRail ShineBorderSimpleRail--${edge}`}>
+              <span className="ShineBorderSimpleStroke" />
+              <span className="ShineBorderSimpleStroke ShineBorderSimpleStroke--second" />
+            </span>
+          ))}
+        </span>
       ) : frame && (
         <svg
           width="100%"

@@ -10,19 +10,19 @@ export function AnimatedShinyText({
   style,
   ...props
 }) {
-  const { simpleEffects } = useMotionPolicy();
+  const { simpleEffects, reducedMotion } = useMotionPolicy();
 
   return (
     <span
       {...props}
-      className={cn('AnimatedShinyText', className)}
+      className={cn('AnimatedShinyText', simpleEffects && 'AnimatedShinyText--simple', className)}
       style={{
         '--shiny-width': `${shimmerWidth}px`,
         ...style,
       }}
     >
       {children}
-      {!simpleEffects && (
+      {!reducedMotion && (
         <span className="AnimatedShinyTextGleam" aria-hidden="true">
           {children}
         </span>

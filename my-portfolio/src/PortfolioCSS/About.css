@@ -1239,20 +1239,92 @@
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
-/* Two static highlights retain the border gleam without animated SVG masks. */
+/* Two slim gleams travel around the edge using transforms, without SVG masks. */
 .ShineBorderSimpleGleam {
   position: absolute;
   inset: 0;
   display: block;
-  opacity: 0.75;
-  background:
-    linear-gradient(90deg, transparent, var(--simple-shine) 38%, #fff9ef 50%, var(--simple-shine) 62%, transparent)
-      left 15% top / 34% var(--shine-border-width, 6px) no-repeat,
-    linear-gradient(90deg, transparent, var(--simple-shine) 38%, #fff9ef 50%, var(--simple-shine) 62%, transparent)
-      right 15% bottom / 34% var(--shine-border-width, 6px) no-repeat;
+  container-type: size;
+  pointer-events: none;
 }
 
+.ShineBorderSimpleRail {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ShineBorderSimpleRail--top,
+.ShineBorderSimpleRail--bottom {
+  left: 0;
+  right: 0;
+  height: var(--shine-border-width, 6px);
+}
+
+.ShineBorderSimpleRail--top { top: 0; --edge-shift: 0; }
+.ShineBorderSimpleRail--bottom { bottom: 0; --edge-shift: -0.5; transform: rotate(180deg); }
+
+.ShineBorderSimpleRail--right,
+.ShineBorderSimpleRail--left {
+  top: 0;
+  bottom: 0;
+  width: var(--shine-border-width, 6px);
+}
+
+.ShineBorderSimpleRail--right { right: 0; --edge-shift: -0.75; }
+.ShineBorderSimpleRail--left { left: 0; --edge-shift: -0.25; transform: rotate(180deg); }
+
+.ShineBorderSimpleStroke {
+  --gleam-length: clamp(64px, 30cqw, 160px);
+  --phase-shift: 0;
+  position: absolute;
+  left: calc(-1 * var(--gleam-length));
+  top: 0;
+  display: block;
+  width: var(--gleam-length);
+  height: 100%;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--simple-shine) 38%, #fff9ef 50%, var(--simple-shine) 62%, transparent);
+  animation: portfolio-gleam-x var(--simple-shine-duration, 10s) linear infinite;
+  animation-delay: calc(var(--simple-shine-duration, 10s) * (var(--edge-shift) + var(--phase-shift)));
+}
+
+.ShineBorderSimpleStroke--second { --phase-shift: -0.5; }
+
+.ShineBorderSimpleRail--right > .ShineBorderSimpleStroke,
+.ShineBorderSimpleRail--left > .ShineBorderSimpleStroke {
+  --gleam-length: clamp(64px, 30cqh, 160px);
+  top: calc(-1 * var(--gleam-length));
+  left: 0;
+  height: var(--gleam-length);
+  width: 100%;
+  background-image: linear-gradient(180deg, transparent, var(--simple-shine) 38%, #fff9ef 50%, var(--simple-shine) 62%, transparent);
+  animation-name: portfolio-gleam-y;
+}
+
+@keyframes portfolio-gleam-x {
+  0% { opacity: 0; transform: translate3d(0, 0, 0); }
+  2% { opacity: 0.85; }
+  23% { opacity: 0.85; }
+  25%, 100% { opacity: 0; transform: translate3d(calc(100cqw + var(--gleam-length)), 0, 0); }
+}
+
+@keyframes portfolio-gleam-y {
+  0% { opacity: 0; transform: translate3d(0, 0, 0); }
+  2% { opacity: 0.85; }
+  23% { opacity: 0.85; }
+  25%, 100% { opacity: 0; transform: translate3d(0, calc(100cqh + var(--gleam-length)), 0); }
+}
+
+.BentoGrid > :nth-child(2n) { --shiny-delay-mobile: -4s; }
+.BentoGrid > :nth-child(3n) { --shiny-delay-mobile: -8s; }
+
 /* CSS motion runs only for visible cards and their visible faces. */
+.ExtrasActions[aria-hidden="true"] .AnimatedShinyTextGleam { animation-play-state: paused; }
+
+.BentoGrid.is-loading .ShineBorderSimpleStroke,
+.BentoGrid > :not([data-in-view="true"]) .ShineBorderSimpleStroke,
 .BentoGrid.is-loading .AnimatedShinyTextGleam,
 .BentoGrid > :not([data-in-view="true"]) .AnimatedShinyTextGleam,
 .BentoGrid > :not([data-in-view="true"]) .TechnicalSkillTrack,
@@ -1275,11 +1347,6 @@ html[data-page-hidden] .AboutDiv *::after {
 @media (max-width: 767px), (any-pointer: coarse), (hover: none) {
   .BentoCard::before,
   .DissolveCard::before {
-    display: none;
-    animation: none;
-  }
-
-  .AnimatedShinyText > .AnimatedShinyTextGleam {
     display: none;
     animation: none;
   }
@@ -1312,4 +1379,17 @@ html[data-page-hidden] .AboutDiv *::after {
     will-change: auto;
   }
   .DissolveCard.is-simple .DissolveLayer.is-active { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ShineBorderSimpleStroke {
+    animation: none;
+    opacity: 0.4;
+    transform: translate3d(calc(var(--gleam-length) * 2), 0, 0);
+  }
+  .ShineBorderSimpleRail--right > .ShineBorderSimpleStroke,
+  .ShineBorderSimpleRail--left > .ShineBorderSimpleStroke {
+    transform: translate3d(0, calc(var(--gleam-length) * 2), 0);
+  }
+  .ShineBorderSimpleStroke--second { display: none; }
 }

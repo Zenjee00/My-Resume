@@ -52,6 +52,24 @@
   }
 }
 
+/* Small/touch screens retain a faint sweep with a long idle period. */
+.AnimatedShinyText--simple > .AnimatedShinyTextGleam {
+  opacity: var(--shiny-opacity-mobile, 0.22);
+  animation-name: portfolio-text-shine-mobile;
+  animation-duration: var(--shiny-duration-mobile, 14s);
+  animation-timing-function: linear;
+  animation-delay: var(--shiny-delay-mobile, 0s);
+}
+
+@keyframes portfolio-text-shine-mobile {
+  0%, 55% {
+    background-position: calc(-1 * var(--shiny-width, 100px)) 0;
+  }
+  90%, 100% {
+    background-position: calc(100% + var(--shiny-width, 100px)) 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce), (forced-colors: active) {
   .AnimatedShinyText > .AnimatedShinyTextGleam {
     display: none;
