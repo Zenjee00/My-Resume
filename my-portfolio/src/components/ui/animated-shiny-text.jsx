@@ -1,6 +1,7 @@
 import './animated-shiny-text.css';
 
 import { cn } from '@/lib/utils';
+import { useMotionPolicy } from '@/lib/portfolio-motion';
 
 export function AnimatedShinyText({
   children,
@@ -9,6 +10,8 @@ export function AnimatedShinyText({
   style,
   ...props
 }) {
+  const { simpleEffects } = useMotionPolicy();
+
   return (
     <span
       {...props}
@@ -19,9 +22,11 @@ export function AnimatedShinyText({
       }}
     >
       {children}
-      <span className="AnimatedShinyTextGleam" aria-hidden="true">
-        {children}
-      </span>
+      {!simpleEffects && (
+        <span className="AnimatedShinyTextGleam" aria-hidden="true">
+          {children}
+        </span>
+      )}
     </span>
   );
 }

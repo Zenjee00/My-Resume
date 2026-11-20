@@ -520,10 +520,6 @@
 }
 
 /* ShineBorder follows the same stepped frame and stays clear of the content. */
-.ShineBorder {
-  animation: portfolio-border-shine var(--shine-duration, 14s) linear infinite;
-}
-
 .BentoCard > .PortfolioShineBorder,
 .DissolveCard > .PortfolioShineBorder {
   --shine-border-inset: var(--frame-offset);
@@ -543,11 +539,6 @@
 
 .BentoGrid > :nth-child(3n) > .PortfolioShineBorder {
   animation-delay: -8s;
-}
-
-@keyframes portfolio-border-shine {
-  0%, 100% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
 }
 
 .GalleryBento > img {
@@ -1219,4 +1210,106 @@
   .ProjectBento {
     transition: none;
   }
+}
+
+
+/* Enter the viewport once; animationend removes the temporary compositor hints. */
+.BentoGrid > [data-reveal="pending"]:not(.TutorialTarget) {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+}
+
+.BentoGrid > [data-reveal="revealing"]:not(.TutorialTarget) {
+  animation: portfolio-card-reveal 260ms ease-out both;
+  will-change: transform, opacity;
+}
+
+@keyframes portfolio-card-reveal {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* No per-frame SVG path work for card switches on touch/small screens. */
+.DissolveCard.is-simple .DissolveLayer.is-active {
+  animation: portfolio-card-content 180ms ease-out both;
+}
+
+@keyframes portfolio-card-content {
+  from { opacity: 0; transform: translate3d(0, 4px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* Two static highlights retain the border gleam without animated SVG masks. */
+.ShineBorderSimpleGleam {
+  position: absolute;
+  inset: 0;
+  display: block;
+  opacity: 0.75;
+  background:
+    linear-gradient(90deg, transparent, var(--simple-shine) 38%, #fff9ef 50%, var(--simple-shine) 62%, transparent)
+      left 15% top / 34% var(--shine-border-width, 6px) no-repeat,
+    linear-gradient(90deg, transparent, var(--simple-shine) 38%, #fff9ef 50%, var(--simple-shine) 62%, transparent)
+      right 15% bottom / 34% var(--shine-border-width, 6px) no-repeat;
+}
+
+/* CSS motion runs only for visible cards and their visible faces. */
+.BentoGrid.is-loading .AnimatedShinyTextGleam,
+.BentoGrid > :not([data-in-view="true"]) .AnimatedShinyTextGleam,
+.BentoGrid > :not([data-in-view="true"]) .TechnicalSkillTrack,
+.DissolveLayer:not(.is-active) .AnimatedShinyTextGleam {
+  animation-play-state: paused;
+}
+
+.BentoGrid.is-loading > .BentoCard::before,
+.BentoGrid.is-loading > .DissolveCard::before,
+.BentoGrid > :not([data-in-view="true"])::before {
+  animation-play-state: paused;
+}
+
+html[data-page-hidden] .AboutDiv *,
+html[data-page-hidden] .AboutDiv *::before,
+html[data-page-hidden] .AboutDiv *::after {
+  animation-play-state: paused !important;
+}
+
+@media (max-width: 767px), (any-pointer: coarse), (hover: none) {
+  .BentoCard::before,
+  .DissolveCard::before {
+    display: none;
+    animation: none;
+  }
+
+  .AnimatedShinyText > .AnimatedShinyTextGleam {
+    display: none;
+    animation: none;
+  }
+
+  .TechnicalSkillViewport {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .TechnicalBentoSkill img,
+  .TutorialArrow,
+  .ExtrasToggle:is(:hover, :focus-visible) {
+    filter: none;
+  }
+
+  .TutorialPanel,
+  .ExtrasActions,
+  .CertificateDialog,
+  .CertificateDialog::backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .BentoGrid > [data-reveal] {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    will-change: auto;
+  }
+  .DissolveCard.is-simple .DissolveLayer.is-active { animation: none; }
 }

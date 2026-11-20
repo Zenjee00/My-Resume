@@ -15,46 +15,46 @@ import { Skeleton } from '@/components/ui/8bit/skeleton';
 import { AnimatedShinyText } from '@/components/ui/animated-shiny-text';
 import { ShineBorder } from '@/components/ui/shine-border';
 
-import linkedInImage from '../Photos/MyContacts/LinkedIn.png';
-import logoDeSalitran from '../Photos/MyExperience/Logo_de_salitran.jpg';
-import nuShield from '../Photos/MyExperience/NU_shield.png';
-import teamQuest from '../Photos/MyExperience/TeamQuest.jpg';
-import myPhoto1 from '../Photos/MyPhotos/MyPhoto1.jpg';
-import myPhoto2 from '../Photos/MyPhotos/MyPhoto2.jpg';
-import courseNFoundLogo from '../Photos/MySkills/CourseNFound.png';
-import certificateImage from '../Photos/MySkills/PMI.png';
-import talkReadyLogo from '../Photos/MySkills/Talkready.png';
-import androidStudioLogo from '../Photos/Technicals/AndroidStudio.png';
-import awsLogo from '../Photos/Technicals/AWS.png';
-import cursorLogo from '../Photos/Technicals/Cursor.png';
-import dartLogo from '../Photos/Technicals/Dart.png';
-import expressJsLogo from '../Photos/Technicals/ExpressJS.png';
-import figmaLogo from '../Photos/Technicals/Figma.png';
-import firebaseLogo from '../Photos/Technicals/Firebase.png';
-import flutterLogo from '../Photos/Technicals/Flutter.png';
-import googleCloudLogo from '../Photos/Technicals/G_Cloud.png';
-import gitLogo from '../Photos/Technicals/Git.png';
-import githubLogo from '../Photos/Technicals/Github.png';
-import gitlabLogo from '../Photos/Technicals/Gitlab.png';
-import gitPilotLogo from '../Photos/Technicals/GitPilot.png';
-import htmlCssLogo from '../Photos/Technicals/HTML_CSS.png';
-import illustratorLogo from '../Photos/Technicals/Illustrator.png';
-import javaLogo from '../Photos/Technicals/java.png';
-import javascriptLogo from '../Photos/Technicals/JS.png';
-import laravelLogo from '../Photos/Technicals/Laravel.png';
-import mysqlLogo from '../Photos/Technicals/MySQL.png';
-import nodeJsLogo from '../Photos/Technicals/NodeJS.png';
-import photoshopLogo from '../Photos/Technicals/Photoshop.png';
-import phpLogo from '../Photos/Technicals/Php.png';
-import playwrightLogo from '../Photos/Technicals/playwright.png';
-import pythonLogo from '../Photos/Technicals/Python.png';
-import reactLogo from '../Photos/Technicals/ReactJS.png';
-import supabaseLogo from '../Photos/Technicals/Supabase.png';
-import typescriptLogo from '../Photos/Technicals/TS.png';
-import vercelLogo from '../Photos/Technicals/vercel.png';
-import vitestLogo from '../Photos/Technicals/vitest.png';
-import vscodeLogo from '../Photos/Technicals/VScode.png';
 import Extras, { getInitialTutorialStep } from './Extras';
+import {
+  linkedInImage,
+  logoDeSalitran,
+  teamQuest,
+  courseNFoundLogo,
+  talkReadyLogo,
+  androidStudioLogo,
+  awsLogo,
+  cursorLogo,
+  dartLogo,
+  expressJsLogo,
+  figmaLogo,
+  firebaseLogo,
+  flutterLogo,
+  googleCloudLogo,
+  gitLogo,
+  githubLogo,
+  gitlabLogo,
+  gitPilotLogo,
+  htmlCssLogo,
+  illustratorLogo,
+  javaLogo,
+  javascriptLogo,
+  laravelLogo,
+  mysqlLogo,
+  nodeJsLogo,
+  photoshopLogo,
+  phpLogo,
+  playwrightLogo,
+  pythonLogo,
+  reactLogo,
+  supabaseLogo,
+  typescriptLogo,
+  vercelLogo,
+  vitestLogo,
+  vscodeLogo,
+  media,
+} from '../lib/portfolio-images';
+import { useMotionPolicy, usePortfolioCardMotion } from '../lib/portfolio-motion';
 
 const experiences = [
   {
@@ -67,7 +67,7 @@ const experiences = [
     name: 'TeamQuest Technology Inc.',
     image: teamQuest,
     description:
-      "From April to June 2026, I worked as a Technical Support Intern at TeamQuest Technology Inc., handling end-user troubleshooting, Google Workspace administration, and multimedia production. I resolved client account access issues, streamlined cloud organization through Google Drive migrations and Google Forms, and edited CapCut training videos to improve employee onboarding and internal operations.",
+      "From April to June 2026, I worked as a Technical Support Intern at TeamQuest Technology Inc., handling end-user troubleshooting, Google Workspace administration, and multimedia production. I resolved client account access issues, organized cloud files through Google Drive migrations and Google Forms, and edited CapCut training videos to improve employee onboarding and internal operations.",
   },
 ];
 
@@ -128,24 +128,13 @@ const projects = [
   },
 ];
 
-const portfolioImages = [
-  ...experiences.map((experience) => experience.image),
-  ...technicalSkills.map(([, image]) => image),
-  ...projects.map((project) => project.image),
-  githubLogo,
-  linkedInImage,
-  myPhoto1,
-  myPhoto2,
-  nuShield,
-  certificateImage,
-];
-
 const particleColors = ['#252D4B', '#756C8A', '#BBA8B0', '#161C35', '#080C1E'];
 const particleLifetime = 0.35;
 
 function TechnicalSkillRow({ skills, reverse = false }) {
   const viewportRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
+  const { canHover, simpleEffects } = useMotionPolicy();
 
   function showSkill(skill, name) {
     const { left } = viewportRef.current.getBoundingClientRect();
@@ -171,7 +160,7 @@ function TechnicalSkillRow({ skills, reverse = false }) {
           const viewport = event.currentTarget;
           if (viewport.contains(event.relatedTarget)) return;
           setTooltip(null);
-          if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          if (!simpleEffects) {
             viewport.scrollLeft = 0;
           }
         }}
@@ -190,15 +179,19 @@ function TechnicalSkillRow({ skills, reverse = false }) {
                   className="TechnicalBentoSkill"
                   tabIndex={isCopy ? undefined : 0}
                   aria-label={isCopy ? undefined : name}
-                  onPointerEnter={(event) => {
-                    if (event.pointerType !== 'touch') showSkill(event.currentTarget, name);
-                  }}
-                  onPointerLeave={(event) => {
+                  onPointerEnter={canHover ? (event) => {
+                    if (event.pointerType === 'mouse') showSkill(event.currentTarget, name);
+                  } : undefined}
+                  onPointerLeave={canHover ? (event) => {
                     if (!event.currentTarget.matches(':focus-visible')) setTooltip(null);
+                  } : undefined}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (!canHover) showSkill(event.currentTarget, name);
                   }}
                   onFocus={(event) => focusSkill(event, name)}
                 >
-                  <img src={image} alt="" draggable={false} />
+                  <img src={image} alt="" width="160" height="160" loading="lazy" decoding="async" draggable={false} />
                 </li>
               ))}
             </ul>
@@ -284,6 +277,7 @@ function DissolveCard({
 }) {
   const [activeSide, setActiveSide] = useState(0);
   const [phase, setPhase] = useState('idle');
+  const { simpleEffects, reducedMotion } = useMotionPolicy();
   const clipId = useId();
   const overlay = useRef(null);
   const visiblePixels = useRef(null);
@@ -293,11 +287,12 @@ function DissolveCard({
   }, [activeSide, phase, onReveal]);
 
   useLayoutEffect(() => {
-    if (phase === 'idle') return;
+    if (phase === 'idle' || phase === 'simple') return;
 
     const { width, height } = overlay.current.getBoundingClientRect();
-    const columns = Math.max(1, Math.ceil(width / 13));
-    const rows = Math.max(1, Math.ceil(height / 13));
+    const pixelSize = Math.max(13, Math.sqrt(width * height / 1000));
+    const columns = Math.max(1, Math.ceil(width / pixelSize));
+    const rows = Math.max(1, Math.ceil(height / pixelSize));
     const pixelWidth = 1 / columns;
     const pixelHeight = 1 / rows;
     const pixels = Array.from({ length: columns * rows }, (_, index) => {
@@ -379,11 +374,18 @@ function DissolveCard({
     return () => cancelAnimationFrame(frame);
   }, [phase]);
 
+  useEffect(() => {
+    if (phase !== 'simple') return;
+    const timer = window.setTimeout(() => setPhase('idle'), 200);
+    return () => window.clearTimeout(timer);
+  }, [phase]);
+
   function toggleCard() {
     if (phase !== 'idle') return;
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (reducedMotion || simpleEffects) {
       setActiveSide((current) => 1 - current);
+      if (!reducedMotion) setPhase('simple');
       return;
     }
 
@@ -412,7 +414,7 @@ function DissolveCard({
           className: `${child.props.className} ${
             index === activeSide ? 'is-active' : ''
           }`,
-          style: index === activeSide && phase !== 'idle'
+          style: index === activeSide && phase !== 'idle' && phase !== 'simple'
             ? { clipPath: `url("#${clipId}")` }
             : undefined,
           'aria-hidden': index !== activeSide,
@@ -424,7 +426,7 @@ function DissolveCard({
         <BentoCardSkeleton variant={className === 'ProfileBento' ? 'profile' : 'intro'} />
       )}
 
-      {phase !== 'idle' && (
+      {phase !== 'idle' && phase !== 'simple' && (
         <svg
           className="DissolveParticles"
           aria-hidden="true"
@@ -448,6 +450,9 @@ function DissolveCard({
 
 function About() {
   const certificateDialogRef = useRef(null);
+  const gridRef = useRef(null);
+  const { isTouch, reducedMotion } = useMotionPolicy();
+  const [isCertificateOpen, setCertificateOpen] = useState(false);
   const profileButtonRef = useRef(null);
   const summaryButtonRef = useRef(null);
   const tutorialMessageId = useId();
@@ -464,36 +469,22 @@ function About() {
     setTutorialStep('profile');
   }
 
+  usePortfolioCardMotion(gridRef, !isLoading, reducedMotion, tutorialRun);
+
   useEffect(() => {
-    let remaining = portfolioImages.length;
-    let minimumTimeElapsed = false;
+    document.documentElement.toggleAttribute('data-touch-input', isTouch);
+    return () => document.documentElement.removeAttribute('data-touch-input');
+  }, [isTouch]);
 
-    function finishLoading() {
-      remaining -= 1;
-      if (remaining === 0 && minimumTimeElapsed) setIsLoading(false);
-    }
-
-    const images = portfolioImages.map((source) => {
-      const image = new Image();
-      image.onload = finishLoading;
-      image.onerror = finishLoading;
-      image.src = source;
-      return image;
-    });
-
-    const minimumTimer = window.setTimeout(() => {
-      minimumTimeElapsed = true;
-      if (remaining === 0) setIsLoading(false);
-    }, 500);
-
-    return () => {
-      window.clearTimeout(minimumTimer);
-      images.forEach((image) => {
-        image.onload = null;
-        image.onerror = null;
-      });
-    };
+  // Only the profile photo gates the skeleton. Other images load independently.
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIsLoading(false), 1500);
+    return () => window.clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (isCertificateOpen) certificateDialogRef.current?.showModal();
+  }, [isCertificateOpen]);
 
   function preventImageAction(event) {
     if (event.target instanceof HTMLImageElement) {
@@ -531,6 +522,7 @@ function About() {
       )}
 
       <div
+        ref={gridRef}
         className={`BentoGrid${isLoading ? ' is-loading' : ''}`}
         aria-hidden={isLoading || undefined}
         inert={isLoading}
@@ -552,6 +544,7 @@ function About() {
               >
                 <img draggable={false}
                   src={experience.image}
+                  width="160" height="160" decoding="async"
                   alt={`${experience.name} logo`}
                 />
 
@@ -582,7 +575,11 @@ function About() {
           <div className="DissolveLayer DissolveProfile">
             <img draggable={false}
               className="ProfileImage"
-              src={myPhoto1}
+              {...media.myPhoto1}
+              sizes="(max-width: 767px) 94vw, (max-width: 1279px) 44vw, 23vw"
+              loading="eager" fetchPriority="high" decoding="async"
+              onLoad={() => setIsLoading(false)}
+              onError={() => setIsLoading(false)}
               alt="Zenjee Viel Borjal"
             />
           </div>
@@ -607,7 +604,7 @@ function About() {
                   rel="noopener noreferrer"
                   onClick={(event) => event.stopPropagation()}
                 >
-                  <img draggable={false} src={linkedInImage} alt="" />
+                  <img draggable={false} src={linkedInImage} alt="" width="104" height="104" loading="lazy" decoding="async" />
                   <AnimatedShinyText>LinkedIn</AnimatedShinyText>
                 </a>
 
@@ -617,7 +614,7 @@ function About() {
                   rel="noopener noreferrer"
                   onClick={(event) => event.stopPropagation()}
                 >
-                  <img draggable={false} src={githubLogo} alt="" />
+                  <img draggable={false} src={githubLogo} alt="" width="160" height="160" loading="lazy" decoding="async" />
                   <AnimatedShinyText>GitHub</AnimatedShinyText>
                 </a>
               </div>
@@ -636,7 +633,8 @@ function About() {
 
           <div className="EducationBentoContent">
             <img draggable={false}
-              src={nuShield}
+              {...media.nuShield}
+              decoding="async"
               alt="National University logo"
             />
 
@@ -697,7 +695,9 @@ function About() {
           {isLoading && <BentoCardSkeleton variant="gallery" />}
           <ShineBorder className="PortfolioShineBorder" shineColor="#C6BFB5" />
           <img draggable={false}
-            src={myPhoto2}
+            {...media.myPhoto2}
+            sizes="(max-width: 767px) 94vw, (max-width: 1279px) 70vw, 800px"
+            loading="lazy" decoding="async"
             alt="Zenjee at his graduation ceremony"
           />
         </div>
@@ -714,13 +714,12 @@ function About() {
           <button
             type="button"
             className="CertificateButton"
-            onClick={() =>
-              certificateDialogRef.current?.showModal()
-            }
+            onClick={() => setCertificateOpen(true)}
             aria-label="View PMI Project Management Ready certificate"
           >
             <img draggable={false}
-              src={certificateImage}
+              {...media.certificateImage}
+              loading="lazy" decoding="async"
               alt="PMI Project Management Ready certificate"
             />
           </button>
@@ -746,6 +745,7 @@ function About() {
 
             <img draggable={false}
               src={project.image}
+              width="260" height="260" loading="lazy" decoding="async"
               alt={`${project.name} logo`}
             />
 
@@ -764,6 +764,7 @@ function About() {
         ref={certificateDialogRef}
         className="CertificateDialog"
         aria-label="PMI Project Management Ready certificate"
+        onClose={() => setCertificateOpen(false)}
         onClick={(event) => {
           if (event.target === event.currentTarget) {
             event.currentTarget.close();
@@ -781,10 +782,13 @@ function About() {
           <AnimatedShinyText>×</AnimatedShinyText>
         </button>
 
-        <img draggable={false}
-          src={certificateImage}
-          alt="PMI Project Management Ready certificate enlarged"
-        />
+        {isCertificateOpen && (
+          <img draggable={false}
+            {...media.certificateFull}
+            decoding="async"
+            alt="PMI Project Management Ready certificate enlarged"
+          />
+        )}
       </dialog>
     </main>
   );

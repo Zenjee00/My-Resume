@@ -6,8 +6,7 @@ import {
 
 import { AnimatedShinyText } from '@/components/ui/animated-shiny-text';
 
-import extrasIcon from '../Photos/Icons/Extras.png';
-import npcPortrait from '../Photos/MyPhotos/NPC.png';
+import { extrasIcon, npcPortrait } from '../lib/portfolio-images';
 import resumePdf from '../Photos/Resume/Zenjee_Resume.pdf';
 
 const tutorialKey = 'portfolio-tutorial-seen';
@@ -45,20 +44,15 @@ function Extras({
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef(null);
   const actionRef = useRef(null);
-  const [targetBox, setTargetBox] = useState(null);
-  const [panelPosition, setPanelPosition] = useState(null);
+  const spotlightRef = useRef(null);
 
   useEffect(() => {
     if (!step) {
-      setTargetBox(null);
-      setPanelPosition(null);
       return;
     }
 
     const target = targetRef?.current;
     if (!target) {
-      setTargetBox(null);
-      setPanelPosition(null);
       actionRef.current?.focus({ preventScroll: true });
       return;
     }
@@ -79,8 +73,10 @@ function Extras({
     const updatePlacement = () => {
       frame = 0;
       const bounds = card.getBoundingClientRect();
-      const panel = panelRef.current?.getBoundingClientRect();
-      if (!panel) return;
+      const panelElement = panelRef.current;
+      const spotlight = spotlightRef.current;
+      const panel = panelElement?.getBoundingClientRect();
+      if (!panel || !spotlight) return;
 
       const viewport = window.visualViewport;
       const width = viewport?.width || window.innerWidth;
@@ -106,26 +102,32 @@ function Extras({
         viewportLeft + (width - panel.width) / 2,
       );
 
-      setTargetBox({
-        left: bounds.left,
-        top: bounds.top,
-        width: bounds.width,
-        height: bounds.height,
-      });
-      setPanelPosition({
-        top,
-        left,
-        maxWidth: Math.max(1, width - margin * 2),
-        maxHeight: Math.max(1, height - margin * 2),
-      });
+      // Read geometry once, then update only transforms during scroll.
+      const put = (element, name, value) => {
+        if (element.style.getPropertyValue(name) !== value) element.style.setProperty(name, value);
+      };
+      put(spotlight, 'width', `${bounds.width}px`);
+      put(spotlight, 'height', `${bounds.height}px`);
+      put(spotlight, 'transform', `translate3d(${bounds.left}px, ${bounds.top}px, 0)`);
+      spotlight.style.visibility = 'visible';
+      put(panelElement, '--tutorial-top', '0px');
+      put(panelElement, '--tutorial-left', '0px');
+      put(panelElement, '--tutorial-transform', `translate3d(${left}px, ${top}px, 0)`);
+      put(panelElement, '--tutorial-max-width', `${Math.max(1, width - margin * 2)}px`);
+      put(panelElement, '--tutorial-max-height', `${Math.max(1, height - margin * 2)}px`);
     };
 
     const schedulePlacement = () => {
       if (!frame) frame = requestAnimationFrame(updatePlacement);
     };
 
+    let lastWidth = window.innerWidth;
     const handleResize = () => {
-      card.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+      // Mobile browser bars resize visualViewport while scrolling; do not scroll back.
+      if (Math.abs(window.innerWidth - lastWidth) > 1) {
+        card.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+        lastWidth = window.innerWidth;
+      }
       schedulePlacement();
     };
 
@@ -135,9 +137,9 @@ function Extras({
     observer.observe(document.body);
     if (panelRef.current) observer.observe(panelRef.current);
     window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', schedulePlacement, true);
+    window.addEventListener('scroll', schedulePlacement, { capture: true, passive: true });
     window.visualViewport?.addEventListener('resize', handleResize);
-    window.visualViewport?.addEventListener('scroll', schedulePlacement);
+    window.visualViewport?.addEventListener('scroll', schedulePlacement, { passive: true });
 
     return () => {
       cancelAnimationFrame(frame);
@@ -199,16 +201,12 @@ function Extras({
   return (
     <>
       {step && targetRef && <div className="TutorialBackdrop" aria-hidden="true" />}
-      {step && targetBox && (
+      {step && targetRef && (
         <div
           className="TutorialSpotlight"
           aria-hidden="true"
-          style={{
-            left: targetBox.left,
-            top: targetBox.top,
-            width: targetBox.width,
-            height: targetBox.height,
-          }}
+          ref={spotlightRef}
+          style={{ top: 0, left: 0, visibility: 'hidden' }}
         />
       )}
 
@@ -217,15 +215,9 @@ function Extras({
           className="TutorialPanel"
           ref={panelRef}
           aria-label="Portfolio guide"
-          style={panelPosition ? {
-            '--tutorial-top': `${panelPosition.top}px`,
-            '--tutorial-left': `${panelPosition.left}px`,
-            '--tutorial-transform': 'none',
-            '--tutorial-max-width': `${panelPosition.maxWidth}px`,
-            '--tutorial-max-height': `${panelPosition.maxHeight}px`,
-          } : undefined}
+
         >
-          <img className="TutorialPortrait" src={npcPortrait} alt="" draggable={false} />
+          <img className="TutorialPortrait" src={npcPortrait} alt="" width="192" height="192" decoding="async" draggable={false} />
           <div className="TutorialDialogue">
             <div className="TutorialHeading">
               <strong>
@@ -283,7 +275,7 @@ function Extras({
           aria-expanded={isOpen}  
           onClick={() => setIsOpen((open) => !open)}
         >
-          <img src={extrasIcon} alt="" draggable={false} />
+          <img src={extrasIcon} alt="" width="144" height="144" decoding="async" draggable={false} />
         </button>
       </div>
     </>

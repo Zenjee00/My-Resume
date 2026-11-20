@@ -2,9 +2,29 @@ body {
   margin: 0;
   min-width: 0;
   min-height: 100vh;
+  isolation: isolate;
+  background: #080C1E;
+}
+
+/* One cached background layer avoids repainting a fixed body background on scroll. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
     linear-gradient(rgb(5 8 24 / 18%), rgb(5 8 24 / 32%)),
-    #080C1E url("../assets/twinkling_farm_night.gif") center / cover fixed no-repeat;
+    #080C1E url("../assets/optimized/night-sky.webp") center / cover no-repeat;
+  transform: translateZ(0);
+}
+
+@media (max-width: 767px), (any-pointer: coarse), (hover: none) {
+  body::before {
+    background-image:
+      linear-gradient(rgb(5 8 24 / 18%), rgb(5 8 24 / 32%)),
+      url("../assets/optimized/night-sky-mobile.webp");
+  }
 }
 
 #root {
@@ -26,23 +46,31 @@ body {
   --portfolio-hand: url("../assets/cursors/Arrow1-v2.png") 24 5, pointer;
 }
 
-html,
-body {
-  cursor: var(--portfolio-arrow);
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body {
+    cursor: var(--portfolio-arrow);
+  }
+  
+  #root :is(a[href], button:enabled, [role="button"], .DissolveCard, .TechnicalBentoSkill),
+  #root .ExtrasToggle,
+  #root .CertificateButton,
+  #root .ExtrasActions :is(button, a),
+  #root .TutorialActions button {
+    cursor: var(--portfolio-hand);
+  }
+  
+  #root :is(a[href], button:enabled, [role="button"], .DissolveCard, .TechnicalBentoSkill):is(:hover, :focus-visible, :active),
+  #root .ExtrasToggle:is(:hover, :focus-visible, :active),
+  #root .CertificateButton:is(:hover, :focus-visible, :active),
+  #root .ExtrasActions :is(button, a):is(:hover, :focus-visible, :active),
+  #root .TutorialActions button:is(:hover, :focus-visible, :active) {
+    cursor: var(--portfolio-hand);
+  }
 }
 
-#root :is(a[href], button:enabled, [role="button"], .DissolveCard, .TechnicalBentoSkill),
-#root .ExtrasToggle,
-#root .CertificateButton,
-#root .ExtrasActions :is(button, a),
-#root .TutorialActions button {
-  cursor: var(--portfolio-hand);
-}
-
-#root :is(a[href], button:enabled, [role="button"], .DissolveCard, .TechnicalBentoSkill):is(:hover, :focus-visible, :active),
-#root .ExtrasToggle:is(:hover, :focus-visible, :active),
-#root .CertificateButton:is(:hover, :focus-visible, :active),
-#root .ExtrasActions :is(button, a):is(:hover, :focus-visible, :active),
-#root .TutorialActions button:is(:hover, :focus-visible, :active) {
-  cursor: var(--portfolio-hand);
+html[data-touch-input],
+html[data-touch-input] body,
+html[data-touch-input] #root * {
+  cursor: auto;
 }

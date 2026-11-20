@@ -4,6 +4,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useMotionPolicy } from '@/lib/portfolio-motion';
 
 export function ShineBorder({
   borderWidth = 1,
@@ -20,14 +21,11 @@ export function ShineBorder({
   const maskId = `${id}-mask`;
 
   const [frame, setFrame] = useState(null);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const { simpleEffects, reducedMotion } = useMotionPolicy();
 
   useLayoutEffect(() => {
+    if (simpleEffects) return;
     const border = borderRef.current;
-
-    const motionPreference = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    );
 
     function measureBorder() {
       const computed = getComputedStyle(border);
@@ -45,39 +43,22 @@ export function ShineBorder({
         parseFloat(computed.getPropertyValue('--frame-pixel')) || 3,
       );
 
-      setFrame({
-        width,
-        height,
-        thickness,
-        pixel,
-      });
-    }
-
-    function updateMotionPreference() {
-      setReducedMotion(motionPreference.matches);
+      setFrame((current) => (
+        current?.width === width && current.height === height
+          && current.thickness === thickness && current.pixel === pixel
+          ? current
+          : { width, height, thickness, pixel }
+      ));
     }
 
     measureBorder();
-    updateMotionPreference();
 
     const observer = new ResizeObserver(measureBorder);
 
     observer.observe(border);
 
-    motionPreference.addEventListener(
-      'change',
-      updateMotionPreference,
-    );
-
-    return () => {
-      observer.disconnect();
-
-      motionPreference.removeEventListener(
-        'change',
-        updateMotionPreference,
-      );
-    };
-  }, [borderWidth]);
+    return () => observer.disconnect();
+  }, [borderWidth, simpleEffects]);
 
   const colors = Array.isArray(shineColor)
     ? shineColor
@@ -131,8 +112,9 @@ export function ShineBorder({
     <span
       ref={borderRef}
       aria-hidden="true"
-      className={`ShineBorder ${className}`}
+      className={`ShineBorder${simpleEffects ? ' ShineBorder--simple' : ''} ${className}`}
       style={{
+        '--simple-shine': colors[0] || '#C6BFB5',
         position: 'absolute',
         inset: 'var(--shine-border-inset, 0px)',
         padding: `var(--shine-border-width, ${borderWidth}px)`,
@@ -146,7 +128,9 @@ export function ShineBorder({
         ...style,
       }}
     >
-      {frame && (
+      {simpleEffects ? (
+        <span className="ShineBorderSimpleGleam" />
+      ) : frame && (
         <svg
           width="100%"
           height="100%"
