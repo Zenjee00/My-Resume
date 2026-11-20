@@ -884,12 +884,12 @@
   position: relative;
   display: flex;
   width: max-content;
-  animation: technical-slide 46s linear infinite paused;
+  animation: technical-slide 32s linear infinite paused;
 }
 
 .TechnicalSkillRow--reverse .TechnicalSkillTrack {
   animation-direction: reverse;
-  animation-duration: 43s;
+  animation-duration: 32s;
 }
 
 .DissolveTechnical.is-active .TechnicalSkillTrack {
@@ -897,9 +897,6 @@
 }
 
 @media (hover: hover) {
-  .DissolveTechnical.is-active .TechnicalSkillRow:hover .TechnicalSkillTrack {
-    animation-play-state: paused;
-  }
 }
 
 .TechnicalSkillRow:has(.TechnicalBentoSkill:focus-visible) .TechnicalSkillTrack {
