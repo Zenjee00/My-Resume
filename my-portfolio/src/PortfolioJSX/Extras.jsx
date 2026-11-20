@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -49,7 +48,7 @@ function Extras({
   const [targetBox, setTargetBox] = useState(null);
   const [panelPosition, setPanelPosition] = useState(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!step) {
       setTargetBox(null);
       setPanelPosition(null);
@@ -64,38 +63,89 @@ function Extras({
       return;
     }
 
+    const card = target.parentElement;
+    const initialBounds = card.getBoundingClientRect();
+    const viewportHeight = window.visualViewport?.height || window.innerHeight;
+    if (initialBounds.top < 12 || initialBounds.bottom > viewportHeight - 12) {
+      card.scrollIntoView({
+        block: initialBounds.height > viewportHeight - 24 ? 'start' : 'center',
+        inline: 'nearest',
+        behavior: 'instant',
+      });
+    }
     target.focus({ preventScroll: true });
+    let frame = 0;
 
     const updatePlacement = () => {
-      const card = target.parentElement.getBoundingClientRect();
+      frame = 0;
+      const bounds = card.getBoundingClientRect();
       const panel = panelRef.current?.getBoundingClientRect();
       if (!panel) return;
 
-      const gap = 20;
-      const fitsBelow = card.bottom + gap + panel.height <= window.innerHeight - 16;
-      const top = fitsBelow
-        ? card.bottom + gap
-        : Math.max(16, card.top - panel.height - gap);
-      const left = Math.min(
-        Math.max(16, (window.innerWidth - panel.width) / 2),
-        window.innerWidth - panel.width - 16,
+      const viewport = window.visualViewport;
+      const width = viewport?.width || window.innerWidth;
+      const height = viewport?.height || window.innerHeight;
+      const viewportTop = viewport?.offsetTop || 0;
+      const viewportLeft = viewport?.offsetLeft || 0;
+      const margin = 12;
+      const gap = 16;
+      const bottom = viewportTop + height - margin;
+      const spaceBelow = bottom - bounds.bottom - gap;
+      const spaceAbove = bounds.top - viewportTop - margin - gap;
+      let top = bottom - panel.height;
+
+      if (spaceBelow >= panel.height) {
+        top = bounds.bottom + gap;
+      } else if (spaceAbove >= panel.height) {
+        top = bounds.top - panel.height - gap;
+      }
+
+      top = Math.max(viewportTop + margin, Math.min(top, bottom - panel.height));
+      const left = Math.max(
+        viewportLeft + margin,
+        viewportLeft + (width - panel.width) / 2,
       );
 
       setTargetBox({
-        left: card.left,
-        top: card.top,
-        width: card.width,
-        height: card.height,
+        left: bounds.left,
+        top: bounds.top,
+        width: bounds.width,
+        height: bounds.height,
       });
-      setPanelPosition({ top, left });
+      setPanelPosition({
+        top,
+        left,
+        maxWidth: Math.max(1, width - margin * 2),
+        maxHeight: Math.max(1, height - margin * 2),
+      });
+    };
+
+    const schedulePlacement = () => {
+      if (!frame) frame = requestAnimationFrame(updatePlacement);
+    };
+
+    const handleResize = () => {
+      card.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+      schedulePlacement();
     };
 
     updatePlacement();
-    window.addEventListener('resize', updatePlacement);
-    window.addEventListener('scroll', updatePlacement, true);
+    const observer = new ResizeObserver(schedulePlacement);
+    observer.observe(card);
+    observer.observe(document.body);
+    if (panelRef.current) observer.observe(panelRef.current);
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', schedulePlacement, true);
+    window.visualViewport?.addEventListener('resize', handleResize);
+    window.visualViewport?.addEventListener('scroll', schedulePlacement);
+
     return () => {
-      window.removeEventListener('resize', updatePlacement);
-      window.removeEventListener('scroll', updatePlacement, true);
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', schedulePlacement, true);
+      window.visualViewport?.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('scroll', schedulePlacement);
     };
   }, [step, targetRef]);
 
@@ -171,6 +221,8 @@ function Extras({
             '--tutorial-top': `${panelPosition.top}px`,
             '--tutorial-left': `${panelPosition.left}px`,
             '--tutorial-transform': 'none',
+            '--tutorial-max-width': `${panelPosition.maxWidth}px`,
+            '--tutorial-max-height': `${panelPosition.maxHeight}px`,
           } : undefined}
         >
           <img className="TutorialPortrait" src={npcPortrait} alt="" draggable={false} />
